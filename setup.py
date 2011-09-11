@@ -1,7 +1,8 @@
 from distribute_setup import use_setuptools
 use_setuptools()
 import os
-import autonomoustorrent
+import shutil
+import autonomotorrent
 from setuptools import setup, find_packages
 
 
@@ -12,10 +13,10 @@ if os.path.exists('build/'): shutil.rmtree('build/')
 
 setup(
     name = "AutonomoTorrent",
-    version = autonomoustorrent.__version__,
+    version = autonomotorrent.__version__,
     #author = "Josh S. Ziegler",
     author_email = "josh.s.ziegler@gmail.com",
-    description = "AutonomoTorrent %s" % autonomoustorrent.__version__,
+    description = "AutonomoTorrent %s" % autonomotorrent.__version__,
     long_description = """A minima, pure-python BitTorrent client.
         """,
     license = "GPLv3",
@@ -33,7 +34,7 @@ setup(
     scripts = [],
     entry_points = {
         'console_scripts': [
-            'autonomo = autonomoustorrent.__main__:console',
+            'autonomo = autonomotorrent.__main__:console',
         ],
         'gui_scripts':[
         ]

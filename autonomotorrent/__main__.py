@@ -28,10 +28,10 @@ else:
 import os
 from twisted.python import log
 from twisted.internet import reactor
-from autonomoustorrent.BTManager import BTManager
-from autonomoustorrent.factory import BTServerFactories
-from autonomoustorrent.MetaInfo import BTMetaInfo
-from autonomoustorrent.DHTProtocol import DHTProtocol
+from autonomotorrent.BTManager import BTManager
+from autonomotorrent.factory import BTServerFactories
+from autonomotorrent.MetaInfo import BTMetaInfo
+from autonomotorrent.DHTProtocol import DHTProtocol
 
 class BTConfig(object):
 

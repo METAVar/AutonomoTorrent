@@ -24,5 +24,14 @@ desires.  I *will* happily accept pull requests or patches for bugs however.
 As the original ABTorrent, this is released under the
 [GPLv3](http://www.gnu.org/licenses/gpl.html).
 
+##Install
+
+`
+git clone git://github.com/joshsziegler/AutonomoTorrent.git  
+cd AutonomoTorrent  
+sudo python setup.py install  
+autonomo ~/torrents/damn_small_linux.torrent  
+`
+
 
 
