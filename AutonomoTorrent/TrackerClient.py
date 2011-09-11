@@ -5,6 +5,7 @@ from twisted.internet import reactor
 
 from bencode import bencode, bdecode
 
+from twisted.python import log
 from twisted.internet import defer
 from twisted.web.client import getPage
 
@@ -75,7 +76,7 @@ class BTTrackerClient (object):
             page = yield getPage(url + '?' + data)
 
         except Exception as error:
-            print 'failed to connect to tracker: ', url
+            log.msg('failed to connect to tracker: {0}'.format(url))
 
             yield sleep(self.interval)
             self.getPeerList(url, data)
@@ -84,7 +85,7 @@ class BTTrackerClient (object):
             res = bdecode(page)
             
             if len(res) == 1:
-                print 'traker: ', res
+                log.msg('traker: {0}'.format(res))
                 return
 
             peers = res['peers']
@@ -94,7 +95,7 @@ class BTTrackerClient (object):
                 port = struct.unpack('!H', peers[4:6])[0]
                 peers_list.append((addr, port))
                 peers = peers[6:]
-            print 'get %d peers form %s' % (len(peers_list), url)
+            log.msg('get {0} peers form {1}'.format(len(peers_list), url))
 
             self.reciever.updateTrackerPeers(peers_list)
         

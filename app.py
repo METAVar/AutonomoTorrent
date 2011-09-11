@@ -1,6 +1,5 @@
-#
-# -*-encoding:gb2312-*-
-
+"""
+"""
 import sys
 
 if sys.version_info.major !=2 and sys.version_info.minor<6:
@@ -27,6 +26,7 @@ else:
         pass
 
 import os
+from twisted.python import log
 from twisted.internet import reactor
 from AutonomoTorrent.BTManager import BTManager
 from AutonomoTorrent.factory import BTServerFactories
@@ -50,19 +50,21 @@ class BTConfig(object):
     def check(self) :
         if self.downloadList is None:
             self.downloadList = range(len(self.metainfo.files))
-        print '-' * 20
+        log.msg('-' * 20)
         for i in self.downloadList :
             f = self.metainfo.files[i]
             size = f['length']
             name = f['path']
-            print size, name
+            log.msg("{0} {1}".format(size, name))
 
         self.rootDir = os.path.join(self.saveDir, self.rootDir)
-        print 'root dir: {0}'.format(self.rootDir)
+        log.msg('root dir: {0}'.format(self.rootDir))
             
 class BTApp:
 
     def __init__(self):
+        log.startLogging(sys.stdout)
+        log.msg("Started logging to stdout.")
         self.tasks = {}
         self.listenPort = BTConfig.listenPort
         self.btServer = BTServerFactories(self.listenPort)
@@ -74,7 +76,7 @@ class BTApp:
         config.check()
         hs = config.info_hash
         if hs in self.tasks:
-            print '{0} is already in download task list'.format(hs)
+            log.msg('{0} is already in download task list'.format(hs))
         else:
             btm = BTManager(self, config)
             self.tasks[hs] = btm
@@ -104,7 +106,7 @@ class BTApp:
 def main(opt, btfiles):
     app = BTApp()
     for torrent_file in btfiles:
-        print 'Adding: {0}'.format(torrent_file)
+        log.msg('Adding: {0}'.format(torrent_file))
         config = BTConfig(torrent_file)
         config.downloadList = None
         config.saveDir = opt.saveDir

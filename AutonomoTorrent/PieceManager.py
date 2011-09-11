@@ -3,6 +3,7 @@
 
 import hashlib
 
+from twisted.python import log
 from bitfield import Bitfield
 from FileManager import BTFileManager, BTFileError, BTHashTestError
 
@@ -100,7 +101,7 @@ class BTPieceManager:
         return idx, my_task
 
     def failedPieceTask(self, idx, task):
-        print 'œ¬‘ÿ ß∞‹ ', idx, task
+        log.msg('œ¬‘ÿ ß∞‹ {0}{1}'.format(idx, task))
 
         task_to_do, task_doing, task_done = self.pieceDownload[idx]
 
@@ -120,7 +121,7 @@ class BTPieceManager:
         task_done.append((task, data))
 
         if not task_to_do and not task_doing :
-            print 'download piece index=', idx
+            log.msg('download piece index= {0}'.format(idx))
 
             task_done.sort(key=lambda x : x[0][0])
             
@@ -128,12 +129,12 @@ class BTPieceManager:
 
             try:
                 self.btfiles.writePiece(idx, data)
-                print 'sha1 success'
+                log.msg('sha1 success')
                 self.bitfield[idx] = 1
                 self.bfNeed[idx] = 0
 
             except BTHashTestError as error:
-                print 'sha1 error'
+                log.err('sha1 error')
                 del self.pieceDownload[idx]
                 if idx == self.pieces_size-1:
                     self.do_slice_tail()

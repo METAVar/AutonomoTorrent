@@ -3,6 +3,7 @@
 
 import abc
 
+from twisted.python import log
 from twisted.internet import reactor
 from twisted.internet import protocol, defer
 
@@ -87,14 +88,10 @@ class ConnectionManager (IConnectionManager):
         myport = self.btm.app.listenPort
         
         yield dht.addNode((addr, port))
-        print '-'*50
-        print 'size of nodes_dict', len(dht.routingTable.nodes_dict)
-        print '-'*50
+        log.msg('size of nodes_dict: {0}'.format(len(dht.routingTable.nodes_dict)))
 
         def callback(peers):
-            print '-'*50
-            print 'get peers form dht,', len(peers)
-            print '-'*50
+            log.msg('get peers form dht, {0}'.format(len(peers)))
             self.clientFactory.updateTrackerPeers(peers)
 
         yield dht.register_torrent(info_hash, myport, callback)
@@ -171,10 +168,10 @@ class BTClientFactory (protocol.ClientFactory, ConnectionManagerBase):
             yield sleep(0)
     
     def startFactory(self):
-        print 'start client factory'
+        log.msg('start client factory')
 
     def stopFactory(self):
-        print 'stop client factory'
+        log.msg('stop client factory')
 
     def startedConnecting(self, connector):
         #print '开始连接', connector.getDestination()

@@ -548,7 +548,10 @@ class DHTProtocolBase (protocol.DatagramProtocol) :
     def writeDatagram(self, data, node_addr):
         node_addr = yield dns_resolve(node_addr)
         for i in range(10):
-            self.transport.write(data, node_addr)
+            try:
+                self.transport.write(data, node_addr)
+            except:
+                log.err()
         
     def datagramReceived(self, datagram, node_addr):
         try:
@@ -673,7 +676,7 @@ class DHTProtocol (DHTProtocolBase) :
         try:
             node_id, _type, values =  (yield self.get_peers(node_addr, info_hash))
         except DHTError as err:
-            print err
+            log.err() 
             return
         else:
             #print 'get_peers', values
@@ -840,7 +843,7 @@ if __name__ == '__main__' :
         old_size = len(peers_set)
         peers_set |= set(peers)
         dz = len(peers_set) - old_size
-        print 'get peers', len(peers_set), dz, len(peers)
+        log.msg('get peers {0} {1} {2}'.format(len(peers_set), dz, len(peers)))
         pass
 
     @defer.inlineCallbacks
@@ -851,11 +854,11 @@ if __name__ == '__main__' :
         for df in [dht.addNode(node) for node in nodes_addr]:
             yield df
 
-        print len(dht.routingTable.nodes_dict)
+        log.msg("Number of nodes: {0}".format(len(dht.routingTable.nodes_dict)))
         
         dht.routingTable.autoFillRoutingTable()
 
-        print len(dht.routingTable.nodes_dict)
+        log.msg("Number of nodes: {0}".format(len(dht.routingTable.nodes_dict)))
 
         yield dht.register_torrent(info_hash, 6889, peers_callback)
 
@@ -864,7 +867,7 @@ if __name__ == '__main__' :
     @defer.inlineCallbacks
     def resolve(hostname):
         ip = yield reactor.resolve(hostname)
-        print 'DNS:', hostname, '->', ip
+        log.msg('DNS: {0}:{1}'.format(hostname, ip))
 
     resolve('www.sohu.com')
 

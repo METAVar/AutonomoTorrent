@@ -4,6 +4,7 @@
 import os
 import hashlib
 
+from twisted.python import log
 from twisted.internet import reactor, defer
 
 from bitfield import Bitfield
@@ -255,8 +256,8 @@ class BTFileManager :
 
         self.bitfieldHave, self.bitfieldNeed = self.btfiles.getBitfield()
 
-        print self.config.saveDir
-        print self.bitfieldNeed
+        log.msg("Saving to: {0}".format(self.config.saveDir))
+        log.msg(self.bitfieldNeed)
 
         self.buffer_reserved = {} # 永驻内存的块，并且单独保存，主要针对文件边界所在的块
 
@@ -305,7 +306,7 @@ class BTFileManager :
         bfd = self.buffer_dirty.copy()
 
         def call_in_thread():
-            print '--O-O write to disk', len(bfd), bfd.keys()
+            log.msg('--O-O write to disk {0} {1}'.format(len(bfd), bfd.keys()))
             for idx in sorted(bfd.keys()) :
                 data = bfd[idx]
                 self.write(idx, data)
@@ -484,7 +485,7 @@ if __name__ == '__main__':
 
         _write(i, _data)
 
-        print '<<< ', i, len(_data)
+        log.msg('<<< {0} {1}'.format(i, len(_data)))
         
         # read
 
@@ -501,7 +502,8 @@ if __name__ == '__main__':
 
         data = _read(i)
 
-        print '>>>', i, len(data), _len, ord(c), ord(data[0])
+        log.msg('>>> {0} {1} {2} {3} {4}'.format(i, len(data), _len, ord(c),
+            ord(data[0])))
 
         assert _data == data
 

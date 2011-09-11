@@ -159,10 +159,9 @@ class BTDownload(object) :
         task = index, (beg, len(piece))
 
         if task not in self.piece_doing: # 很久之后接收到的包，直接丢掉不要
-            print '-->> drop canceled piece:', task
+            log.msg('-->> drop canceled piece: {0}'.format(task))
             return
 
-        print ">>"*20
 
         self.pieceManager.finishPieceTask(index, (beg, len(piece)), piece)
         
