@@ -26,12 +26,12 @@ As the original ABTorrent, this is released under the
 
 ##Install
 
-`
+```
 git clone git://github.com/joshsziegler/AutonomoTorrent.git  
 cd AutonomoTorrent  
 sudo python setup.py install  
 autonomo ~/torrents/damn_small_linux.torrent  
-`
+```
 
 
 
