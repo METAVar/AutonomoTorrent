@@ -33,5 +33,13 @@ sudo python setup.py install
 autonomo ~/torrents/damn_small_linux.torrent  
 ```
 
+If you have issues with Twisted while running setup, first make sure you have
+the python dev stuff installed (`sudo apt-get install python-dev build-essential` 
+on Ubuntu).  If that doesn't work, you might be better off simply installing it 
+manually.  
+  
+  - Ubuntu: `sudo apt-get install python-twisted`  
+  - Windows: Get the [installer here](http://twistedmatrix.com/trac/wiki/Downloads#Windows).  
+
 
 
