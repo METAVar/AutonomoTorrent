@@ -40,7 +40,7 @@ setup(
         ]
     },
     install_requires = [
-        'Twisted >= 10.0, < 10.3',
+        'Twisted >= 10.2',
     ],
     package_data = {
         '': ['*.markdown'],
