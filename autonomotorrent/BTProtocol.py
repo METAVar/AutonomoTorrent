@@ -314,9 +314,9 @@ class BTProtocol (protocol.Protocol):
 
         addr = self.transport.getPeer().host
         
-        log.msg('-->> port ', '{}:{}'.format(addr, port))
+        log.msg('-->> port {0}:{1}'.format(addr, port))
 
-        self.dht_fp.write('{}\t{}\n'.format(addr, port))
+        self.dht_fp.write('{0}\t{1}\n'.format(addr, port))
         self.dht_fp.flush()
 
         self.btm.connectionManager.handle_port(addr, port)
