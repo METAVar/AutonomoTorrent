@@ -83,18 +83,19 @@ class ConnectionManager (IConnectionManager):
 
     @defer.inlineCallbacks
     def handle_port(self, addr, port):
-        dht = self.btm.app.dht
-        info_hash = self.btm.info_hash
-        myport = self.btm.app.listenPort
-        
-        yield dht.addNode((addr, port))
-        log.msg('size of nodes_dict: {0}'.format(len(dht.routingTable.nodes_dict)))
+        if self.btm.app.enable_DHT:
+            dht = self.btm.app.dht
+            info_hash = self.btm.info_hash
+            myport = self.btm.app.listenPort
+            
+            yield dht.addNode((addr, port))
+            log.msg('size of nodes_dict: {0}'.format(len(dht.routingTable.nodes_dict)))
 
-        def callback(peers):
-            log.msg('get peers form dht, {0}'.format(len(peers)))
-            self.clientFactory.updateTrackerPeers(peers)
+            def callback(peers):
+                log.msg('get peers form dht, {0}'.format(len(peers)))
+                self.clientFactory.updateTrackerPeers(peers)
 
-        yield dht.register_torrent(info_hash, myport, callback)
+            yield dht.register_torrent(info_hash, myport, callback)
 
 class ConnectionManagerBase (IConnectionManager):
     def __init__(self, btm):

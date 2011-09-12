@@ -67,15 +67,17 @@ class BTConfig(object):
             
 class BTApp:
 
-    def __init__(self):
+    def __init__(self, enable_DHT=False):
+        self.enable_DHT = enable_DHT
         log.startLogging(sys.stdout)
         log.msg("Started logging to stdout.")
         self.tasks = {}
         self.listenPort = BTConfig.listenPort
         self.btServer = BTServerFactories(self.listenPort)
         reactor.listenTCP(BTConfig.listenPort, self.btServer)
-        self.dht = DHTProtocol()
-        reactor.listenUDP(self.listenPort, self.dht)
+        if enable_DHT:
+            self.dht = DHTProtocol()
+            reactor.listenUDP(self.listenPort, self.dht)
 
     def add_torrent(self, config):
         config.check()
@@ -109,7 +111,7 @@ class BTApp:
 
 
 def main(opt, btfiles):
-    app = BTApp()
+    app = BTApp(opt.enable_dht)
     for torrent_file in btfiles:
         log.msg('Adding: {0}'.format(torrent_file))
         config = BTConfig(torrent_file)
@@ -132,6 +134,9 @@ def console():
     parser.add_option('-p', '--port', action='store', type='int',
                      dest='listenPort', default=6881, metavar='LISTEN-PORT',
                      help='the listen port')
+
+    parser.add_option("-d", "--enable_dht", action="store_true",
+                    dest="enable_dht", help="enable the DHT extension") 
 
     options, args = parser.parse_args()
     if(len(args) > 0):
