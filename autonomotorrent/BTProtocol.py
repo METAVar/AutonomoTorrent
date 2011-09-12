@@ -262,17 +262,13 @@ class BTProtocol(protocol.Protocol):
         index, begin, length = struct.unpack('!III', data)
         self.upload._cancel(index, begin, length)
 
-    # TODO: Put this somewher else and switch it off if self.btm.app.enble_DHT
-    # is false
-    dht_fp = open('dht.txt', 'wb') 
-
     def handle_port(self, data):
         if self.btm.app.enable_DHT:
+            dht_fp = open('dht.txt', 'wb') 
             port, = struct.unpack('!H', data)
             self.dht_port = port
 
             addr = self.transport.getPeer().host
-            
             self.dht_fp.write('{0}\t{1}\n'.format(addr, port))
             self.dht_fp.flush()
 
