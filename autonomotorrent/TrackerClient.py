@@ -3,7 +3,7 @@
 
 from twisted.internet import reactor
 
-from bencode import bencode, bdecode
+from bencode import bencode, bdecode, BTError
 
 from twisted.python import log
 from twisted.internet import defer
@@ -82,26 +82,29 @@ class BTTrackerClient (object):
             self.getPeerList(url, data)
 
         else:
-            res = bdecode(page)
+            try:
+                res = bdecode(page)
+            except BTError:
+                log.err("Invalid bencoded string")
+            else:
+                if len(res) == 1:
+                    log.msg('traker: {0}'.format(res))
+                    return
+
+                peers = res['peers']
+                peers_list = []
+                while peers:
+                    addr = socket.inet_ntoa(peers[:4])
+                    port = struct.unpack('!H', peers[4:6])[0]
+                    peers_list.append((addr, port))
+                    peers = peers[6:]
+                log.msg('get {0} peers form {1}'.format(len(peers_list), url))
+
+                self.reciever.updateTrackerPeers(peers_list)
             
-            if len(res) == 1:
-                log.msg('traker: {0}'.format(res))
-                return
+                interval = res.get('interval', self.interval)
 
-            peers = res['peers']
-            peers_list = []
-            while peers:
-                addr = socket.inet_ntoa(peers[:4])
-                port = struct.unpack('!H', peers[4:6])[0]
-                peers_list.append((addr, port))
-                peers = peers[6:]
-            log.msg('get {0} peers form {1}'.format(len(peers_list), url))
-
-            self.reciever.updateTrackerPeers(peers_list)
-        
-            interval = res.get('interval', self.interval)
-
-            yield sleep(interval)
-            self.getPeerList(url, data)
+                yield sleep(interval)
+                self.getPeerList(url, data)
 
             
