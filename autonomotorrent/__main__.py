@@ -2,9 +2,14 @@
 """
 import sys
 
-if sys.version_info.major !=2 and sys.version_info.minor<6:
-    print 'require python 2.6 or newer'
-    exit()
+try: 
+    if sys.version_info.major !=2 and sys.version_info.minor < 6:
+        print 'require python 2.6 or newer'
+        exit()
+except AttributeError:
+    if sys.version_info[0] != 2 and sys.version_info[1] < 6:
+        print 'require python 2.6 or newer'
+        exit()
 
 try:
     import twisted
