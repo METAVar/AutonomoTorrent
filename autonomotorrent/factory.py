@@ -89,7 +89,6 @@ class ConnectionManager (IConnectionManager):
             myport = self.btm.app.listenPort
             
             yield dht.addNode((addr, port))
-            log.msg('Size of nodes_dict: {0}'.format(len(dht.routingTable.nodes_dict)))
 
             def callback(peers):
                 log.msg('Received {0} peers from DHT'.format(len(peers)))

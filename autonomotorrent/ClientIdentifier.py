@@ -89,7 +89,7 @@ matches = [(re.compile(pattern, re.DOTALL), name) for pattern, name in matches]
 
 unknown_clients = {}
 
-def identify_client(peerid, log=None):
+def identify_client(peerid, client_log=None):
     client = 'unknown'
     version = ''
     for pat, name in matches:
@@ -149,9 +149,9 @@ def identify_client(peerid, log=None):
                 client = "Shareaza"
         
         
-    if log is not None and 'unknown' in client:
+    if client_log is not None and 'unknown' in client:
         if not unknown_clients.has_key(peerid):
             unknown_clients[peerid] = True
-            log.write('%s\n'%peerid)
-            log.write('------------------------------\n')
+            client_log.write('%s\n'%peerid)
+            client_log.write('------------------------------\n')
     return client, version
