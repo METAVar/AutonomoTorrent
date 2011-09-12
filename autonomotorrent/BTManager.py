@@ -9,23 +9,15 @@ from TrackerClient import BTTrackerClient
 class BTManager (object):
     def __init__(self, app, config):
         self.app = app
-        
         self.config = config
-
         self.metainfo = config.metainfo
         self.info_hash = self.metainfo.info_hash
-
         self.downloadSpeedMonitor = SpeedMonitor()
         self.uploadSpeedMonitor = SpeedMonitor()
-
         self.my_peer_id = generate_peer_id()
-
         self.connectionManager = ConnectionManager(self)
-
         self.pieceManager = BTPieceManager(self)
-
         self.bttrackerclient = BTTrackerClient(self) # 管理对tracker服务器的连接
-
         self.status = None
 
     def startDownload(self):

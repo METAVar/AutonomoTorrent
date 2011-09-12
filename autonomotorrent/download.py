@@ -158,8 +158,8 @@ class BTDownload(object) :
         # 接收发来的piece
         task = index, (beg, len(piece))
 
-        if task not in self.piece_doing: # 很久之后接收到的包，直接丢掉不要
-            log.msg('-->> drop canceled piece: {0}'.format(task))
+        if task not in self.piece_doing: 
+            #log.msg('-->> drop canceled piece: {0}'.format(task))
             return
 
 

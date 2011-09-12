@@ -76,7 +76,7 @@ class BTTrackerClient (object):
             page = yield getPage(url + '?' + data)
 
         except Exception as error:
-            log.msg('failed to connect to tracker: {0}'.format(url))
+            log.err('Failed to connect to tracker: {0}'.format(url))
 
             yield sleep(self.interval)
             self.getPeerList(url, data)
@@ -85,10 +85,10 @@ class BTTrackerClient (object):
             try:
                 res = bdecode(page)
             except BTError:
-                log.err("Invalid bencoded string")
+                log.err("Received an invalid peer list from the tracker: {0}".format(url))
             else:
                 if len(res) == 1:
-                    log.msg('traker: {0}'.format(res))
+                    log.msg('Tracker: {0}'.format(res))
                     return
 
                 peers = res['peers']
@@ -98,7 +98,7 @@ class BTTrackerClient (object):
                     port = struct.unpack('!H', peers[4:6])[0]
                     peers_list.append((addr, port))
                     peers = peers[6:]
-                log.msg('get {0} peers form {1}'.format(len(peers_list), url))
+                log.msg('Received {0} peers from tracker: {1}'.format(len(peers_list), url))
 
                 self.reciever.updateTrackerPeers(peers_list)
             

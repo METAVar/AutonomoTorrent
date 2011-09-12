@@ -89,10 +89,10 @@ class ConnectionManager (IConnectionManager):
             myport = self.btm.app.listenPort
             
             yield dht.addNode((addr, port))
-            log.msg('size of nodes_dict: {0}'.format(len(dht.routingTable.nodes_dict)))
+            log.msg('Size of nodes_dict: {0}'.format(len(dht.routingTable.nodes_dict)))
 
             def callback(peers):
-                log.msg('get peers form dht, {0}'.format(len(peers)))
+                log.msg('Received {0} peers from DHT'.format(len(peers)))
                 self.clientFactory.updateTrackerPeers(peers)
 
             yield dht.register_torrent(info_hash, myport, callback)
@@ -169,10 +169,10 @@ class BTClientFactory (protocol.ClientFactory, ConnectionManagerBase):
             yield sleep(0)
     
     def startFactory(self):
-        log.msg('start client factory')
+        pass
 
     def stopFactory(self):
-        log.msg('stop client factory')
+        pass
 
     def startedConnecting(self, connector):
         #print '开始连接', connector.getDestination()

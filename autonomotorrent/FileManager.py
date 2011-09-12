@@ -253,17 +253,10 @@ class BTFileManager :
         self.pieceNum = metainfo.pieces_size
 
         self.btfiles = BTFiles(metainfo, self.config.saveDir, self.config.downloadList)
-
         self.bitfieldHave, self.bitfieldNeed = self.btfiles.getBitfield()
-
         log.msg("Saving to: {0}".format(self.config.saveDir))
-        log.msg(self.bitfieldNeed)
-
         self.buffer_reserved = {} # 永驻内存的块，并且单独保存，主要针对文件边界所在的块
-
         self.buffer_max_size = 100 * 2**20 / self.piece_length # 100M缓冲大小
-
-        #print self.buffer_max_size
 
     def start(self) :
         self.status = 'started'
@@ -306,7 +299,7 @@ class BTFileManager :
         bfd = self.buffer_dirty.copy()
 
         def call_in_thread():
-            log.msg('--O-O write to disk {0} {1}'.format(len(bfd), bfd.keys()))
+            # Writing to disk 
             for idx in sorted(bfd.keys()) :
                 data = bfd[idx]
                 self.write(idx, data)
@@ -482,15 +475,10 @@ if __name__ == '__main__':
             _len = metainfo.piece_length
 
         _data = c * _len
-
         _write(i, _data)
 
-        log.msg('<<< {0} {1}'.format(i, len(_data)))
-        
         # read
-
         i = randint(0, pieceNum-1)
-        
         c = char[i]
 
         if i == pieceNum-1:
@@ -499,16 +487,8 @@ if __name__ == '__main__':
             _len = metainfo.piece_length
         
         _data = c * _len
-
         data = _read(i)
-
-        log.msg('>>> {0} {1} {2} {3} {4}'.format(i, len(data), _len, ord(c),
-            ord(data[0])))
-
         assert _data == data
-
-        #print 'length, ', len(bfm.buffer_dirty), len(bfm.buffer), len(bfm.buffer_reserved)
-        
         reactor.callLater(0, read_write)
 
     read_write()

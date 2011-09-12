@@ -16,7 +16,7 @@ from tools import SpeedMonitor, sleep
 from upload import BTUpload
 from download import BTDownload
 
-class BTProtocol (protocol.Protocol):
+class BTProtocol(protocol.Protocol):
 
     msg_choke = '\x00'
     msg_unchoke = '\x01'
@@ -42,9 +42,7 @@ class BTProtocol (protocol.Protocol):
 
     def __init__(self):
         self.peer_id = None
-
         self.status = None
-
 
     def connectionMade(self):
         self.status = 'handshake'
@@ -120,46 +118,32 @@ class BTProtocol (protocol.Protocol):
         data = '\x13' + 'BitTorrent protocol' + reserved + info_hash + my_id
         self.transport.write(data)
 
-        log.msg('<<-- handshake')
-
     @defer.inlineCallbacks
     def send_keep_alive(self):
         yield sleep(60.0)
         while self.connected:
             self.send_data('')
-            log.msg('<<-- keep alive')
-
             yield sleep(60.0)
 
     def send_choke(self):
         self.am_choke = True
         self.send_data(self.msg_choke)
-
-        log.msg('<<-- choke')
         
     def send_unchoke(self):
         self.am_choke = False
         self.send_data(self.msg_unchoke)
 
-        log.msg('<<-- unchoke')
-
     def send_interested(self):
         self.am_interested = True
         self.send_data(self.msg_interested)
-
-        log.msg('<<-- interested')
 
     def send_not_interested(self):
         self.am_interested = False
         self.send_data(self.msg_not_interested)
 
-        log.msg('<<-- not interested')
-
     def send_have(self, index):
         data = struct.pack('!I', index)
         self.send_message(self.msg_have, data)
-
-        log.msg('<<-- have index: {0}'.format(index))
 
     def send_bitfield(self, bitfield):
         if type(bitfield) is str :
@@ -170,33 +154,22 @@ class BTProtocol (protocol.Protocol):
             raise TypeError('bitfield should be str or Bitfield')
 
         self.send_message(self.msg_bitfield, data)
-
-        log.msg('<<-- bitfield')
         
     def send_request(self, index, begin, length):
         data = struct.pack('!III', index, begin, length)
         self.send_message(self.msg_request, data)
 
-        log.msg('<<-- request index={0}, begin={1}, length={2}'.format(index, begin,
-            length))
-
     def send_piece(self, index, begin, piece):
         data = struct.pack('!II', index, begin) + piece
         self.send_message(self.msg_piece, data)
-
-        log.msg('<<-- piece index={0}, begin={1}'.format(index, begin))
 
     def send_cancel(self, idx, begin, length):
         data = struct.pack('!III', idx, begin, length)
         self.send_message(self.msg_cancel, data)
 
-        log.msg('<<-- cancel index={0}, begin={1}'.format(idx, begin))
-
     def send_port(self, port):
         data = struct.pack('!I', port)
         self.send_message(self.msg_port, data)
-
-        log.msg('<<-- port {0}'.format(port))
 
     def __downloadMonitor(self, data):
         pass
@@ -252,22 +225,18 @@ class BTProtocol (protocol.Protocol):
         self.peer_id = peer_id
     
     def handle_keep_alive(self):
-        log.msg('-->> keep alive')
+        pass
 
     def handle_choke(self, data):
-        log.msg('-->> choke')
         self.download._choke(True)
 
     def handle_unchoke(self, data):
-        log.msg('-->> unchoke')
         self.download._choke(False)
 
     def handle_interested(self, data):
-        log.msg('-->> interested')
         self.upload._interested(True)
         
     def handle_not_interested(self, data):
-        log.msg('-->> not interested')
         self.upload._interested(False)
 
     def handle_have(self, data):
@@ -277,49 +246,37 @@ class BTProtocol (protocol.Protocol):
         # print '-->> have index=%d' % index
 
     def handle_bitfield(self, data):
-        log.msg('-->> bitfield')
 
         self.download._bitfield(data)
 
     def handle_request(self, data):
         index, begin, length = struct.unpack('!III', data)
-
-        log.msg('-->> request index={0}, begin={1}, length={2}'.format(index, begin,
-            length))
-
         self.upload._request(index, begin, length)
     
     def handle_piece(self, data):
         index, begin = struct.unpack('!II', data[:8])
         piece = data[8:]
-
-        log.msg('-->> piece index={0}, begin={1}, length={2}'.format(index,
-            begin, len(piece)))
-
         self.download._piece(index, begin, piece)
 
     def handle_cancel(self, data):
         index, begin, length = struct.unpack('!III', data)
-
-        log.msg('-->> cancel index={0}, begin={1}, length={2}'.format(index, begin,
-            length))
-
         self.upload._cancel(index, begin, length)
 
-    dht_fp = open('dht.txt', 'wb')
+    # TODO: Put this somewher else and switch it off if self.btm.app.enble_DHT
+    # is false
+    dht_fp = open('dht.txt', 'wb') 
 
     def handle_port(self, data):
-        port, = struct.unpack('!H', data)
-        self.dht_port = port
+        if self.btm.app.enable_DHT:
+            port, = struct.unpack('!H', data)
+            self.dht_port = port
 
-        addr = self.transport.getPeer().host
-        
-        log.msg('-->> port {0}:{1}'.format(addr, port))
+            addr = self.transport.getPeer().host
+            
+            self.dht_fp.write('{0}\t{1}\n'.format(addr, port))
+            self.dht_fp.flush()
 
-        self.dht_fp.write('{0}\t{1}\n'.format(addr, port))
-        self.dht_fp.flush()
-
-        self.btm.connectionManager.handle_port(addr, port)
+            self.btm.connectionManager.handle_port(addr, port)
 
 ############################################################
 class BTClientProtocol (BTProtocol):

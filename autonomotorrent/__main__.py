@@ -55,22 +55,19 @@ class BTConfig(object):
     def check(self) :
         if self.downloadList is None:
             self.downloadList = range(len(self.metainfo.files))
-        log.msg('-' * 20)
         for i in self.downloadList :
             f = self.metainfo.files[i]
             size = f['length']
             name = f['path']
-            log.msg("{0} {1}".format(size, name))
+            log.msg("{0} {1}".format(size, name)) # TODO: Do we really need this?
 
         self.rootDir = os.path.join(self.saveDir, self.rootDir)
-        log.msg('root dir: {0}'.format(self.rootDir))
             
 class BTApp:
 
     def __init__(self, enable_DHT=False):
         self.enable_DHT = enable_DHT
-        log.startLogging(sys.stdout)
-        log.msg("Started logging to stdout.")
+        log.startLogging(sys.stdout) # Start logging to stdout
         self.tasks = {}
         self.listenPort = BTConfig.listenPort
         self.btServer = BTServerFactories(self.listenPort)
@@ -83,7 +80,7 @@ class BTApp:
         config.check()
         hs = config.info_hash
         if hs in self.tasks:
-            log.msg('{0} is already in download task list'.format(hs))
+            log.msg('{0} is already in download list'.format(hs))
         else:
             btm = BTManager(self, config)
             self.tasks[hs] = btm

@@ -854,12 +854,8 @@ if __name__ == '__main__' :
         for df in [dht.addNode(node) for node in nodes_addr]:
             yield df
 
-        log.msg("Number of nodes: {0}".format(len(dht.routingTable.nodes_dict)))
-        
         dht.routingTable.autoFillRoutingTable()
-
         log.msg("Number of nodes: {0}".format(len(dht.routingTable.nodes_dict)))
-
         yield dht.register_torrent(info_hash, 6889, peers_callback)
 
     init()

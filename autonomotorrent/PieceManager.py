@@ -101,10 +101,8 @@ class BTPieceManager:
         return idx, my_task
 
     def failedPieceTask(self, idx, task):
-        log.msg('œ¬‘ÿ ß∞‹ {0}{1}'.format(idx, task))
-
+        #log.err('œ¬‘ÿ ß∞‹ {0}{1}'.format(idx, task))
         task_to_do, task_doing, task_done = self.pieceDownload[idx]
-
         assert task in task_doing
 
         task_doing.remove(task)
@@ -121,20 +119,16 @@ class BTPieceManager:
         task_done.append((task, data))
 
         if not task_to_do and not task_doing :
-            log.msg('download piece index= {0}'.format(idx))
-
             task_done.sort(key=lambda x : x[0][0])
-            
             data = ''.join(d for t, d in task_done)
 
             try:
                 self.btfiles.writePiece(idx, data)
-                log.msg('sha1 success')
                 self.bitfield[idx] = 1
                 self.bfNeed[idx] = 0
 
             except BTHashTestError as error:
-                log.err('sha1 error')
+                # sha1 error ~ corrupt piece
                 del self.pieceDownload[idx]
                 if idx == self.pieces_size-1:
                     self.do_slice_tail()
