@@ -59,7 +59,7 @@ class BTConfig(object):
             f = self.metainfo.files[i]
             size = f['length']
             name = f['path']
-            log.msg("{0} {1}".format(size, name)) # TODO: Do we really need this?
+            log.msg("File: {0} Size: {1}".format(name, size)) # TODO: Do we really need this?
 
         self.rootDir = os.path.join(self.saveDir, self.rootDir)
             

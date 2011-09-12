@@ -88,7 +88,7 @@ class BTTrackerClient (object):
                 log.err("Received an invalid peer list from the tracker: {0}".format(url))
             else:
                 if len(res) == 1:
-                    log.msg('Tracker: {0}'.format(res))
+                    log.msg('Tracker: {0}'.format(res)) # TODO: What is this?
                     return
 
                 peers = res['peers']

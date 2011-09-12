@@ -70,8 +70,8 @@ class BTProtocol(protocol.Protocol):
         self.send_keep_alive()
 
         if self.btm.connectionManager.isAlreadyConnected(self.peer_id) :
+            # Already connected, dropping the connection
             reactor.callLater(0, self.transport.loseConnection)
-            log.msg('<<-->> already connected, drop the connection')
         else:
             self.factory.addActiveConnection(self.peer_id, self)
 
@@ -217,8 +217,7 @@ class BTProtocol(protocol.Protocol):
                     raise NotImplementedError(method_name)
 
     def handle_handshake(self, protocol, reserved, info_hash, peer_id):
-        log.msg('-->> handshake {0}'.format(identify_client(peer_id)))
-
+        log.msg('Connected to client ID: {0}'.format(identify_client(peer_id)))
         self.peer_protocol = protocol
         self.peer_reserved = reserved
         self.peer_info_hash = info_hash
