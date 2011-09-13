@@ -45,7 +45,7 @@ class BTTrackerClient (object):
 
         info_hash = self.btm.metainfo.info_hash
         peer_id = self.btm.my_peer_id
-        port = self.btm.app.btServer.listenPort
+        port = self.btm.app.btServer.listen_port
         request = {
             'info_hash' : info_hash,
             'peer_id' : peer_id,

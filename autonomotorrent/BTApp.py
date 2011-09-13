@@ -1,6 +1,7 @@
 """
 """
 import sys
+import os
 
 from twisted.python import log
 from twisted.internet import reactor
@@ -37,7 +38,7 @@ class BTConfig(object):
 class BTApp:
     def __init__(self, listen_port=6881, enable_DHT=False):
         log.startLogging(sys.stdout) # Start logging to stdout
-        self.listenPort = listen_port
+        self.listen_port = listen_port
         self.enable_DHT = enable_DHT
         self.tasks = {}
         self.btServer = BTServerFactories(self.listen_port)

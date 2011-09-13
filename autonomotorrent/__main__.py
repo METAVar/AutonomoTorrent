@@ -5,7 +5,7 @@ from twisted.python import log
 from autonomotorrent.BTApp import BTApp, BTConfig
 
 def main(opt, btfiles):
-    app = BTApp(opt.enable_dht)
+    app = BTApp(enable_DHT=opt.enable_dht)
     for torrent_file in btfiles:
         try:
             log.msg('Adding: {0}'.format(torrent_file))
@@ -16,6 +16,7 @@ def main(opt, btfiles):
             app.add_torrent(config)
 
         except:
+            log.err()
             log.err("Failed to add {0}".format(torrent_file))
 
     app.start_reactor()
