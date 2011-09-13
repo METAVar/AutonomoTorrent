@@ -11,9 +11,9 @@ from autonomotorrent.MetaInfo import BTMetaInfo
 from autonomotorrent.DHTProtocol import DHTProtocol
 
 class BTConfig(object):
-    listenPort = 6881
-    maxDownloadSpeed = 1024
-    maxUploadSpeed = 1024
+    # FIXME: I don't think these are used...
+    #maxDownloadSpeed = 1024 
+    #maxUploadSpeed = 1024
 
     def __init__(self, torrentPath) :
         self.torrentPath = torrentPath
@@ -35,16 +35,16 @@ class BTConfig(object):
         self.rootDir = os.path.join(self.saveDir, self.rootDir)
             
 class BTApp:
-    def __init__(self, enable_DHT=False):
-        self.enable_DHT = enable_DHT
+    def __init__(self, listen_port=6881, enable_DHT=False):
         log.startLogging(sys.stdout) # Start logging to stdout
+        self.listenPort = listen_port
+        self.enable_DHT = enable_DHT
         self.tasks = {}
-        self.listenPort = BTConfig.listenPort
-        self.btServer = BTServerFactories(self.listenPort)
-        reactor.listenTCP(BTConfig.listenPort, self.btServer)
+        self.btServer = BTServerFactories(self.listen_port)
+        reactor.listenTCP(self.listen_port, self.btServer)
         if enable_DHT:
             self.dht = DHTProtocol()
-            reactor.listenUDP(self.listenPort, self.dht)
+            reactor.listenUDP(self.listen_port, self.dht)
 
     def add_torrent(self, config):
         config.check()

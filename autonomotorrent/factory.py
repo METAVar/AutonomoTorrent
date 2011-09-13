@@ -86,7 +86,7 @@ class ConnectionManager (IConnectionManager):
         if self.btm.app.enable_DHT:
             dht = self.btm.app.dht
             info_hash = self.btm.info_hash
-            myport = self.btm.app.listenPort
+            myport = self.btm.app.listen_port
             
             yield dht.addNode((addr, port))
 
@@ -218,8 +218,6 @@ class BTServerFactory (protocol.ServerFactory, ConnectionManagerBase):
 
     protocol = BTServerProtocol
 
-    listenPort = 6881
-
     def __init__(self, btm):
         ConnectionManagerBase.__init__(self, btm)
 
@@ -231,20 +229,14 @@ class BTServerFactory (protocol.ServerFactory, ConnectionManagerBase):
         return getattr(self.btm.app.btServer, name)
         
 class BTServerFactories (protocol.ServerFactory):
-    '''
-    监听端口 服务于 所有 bt任务
-
-    当handshake成功后，移交给对应的facotry管理
-    '''
+    """ 
+    """ 
 
     protocol = BTServerProtocol
-
-    listenPort = 6881
     
-    def __init__(self, port=None):
+    def __init__(self, listen_port=6881):
         self.maps = {}
-        if port :
-            self.listenPort = port
+        self.listen_port = listen_port
     
     def startFactory(self):
         pass
