@@ -2,27 +2,14 @@
 """
 import sys
 
-try: 
-    if sys.version_info.major !=2 and sys.version_info.minor < 6:
-        print 'require python 2.6 or newer'
-        exit()
-except AttributeError:
-    if sys.version_info[0] != 2 and sys.version_info[1] < 6:
-        print 'require python 2.6 or newer'
-        exit()
-
-try:
-    import twisted
-except ImportError as err:
-    print 'require twisted 10.2.0 or newer'
-    exit()
-
 from twisted.python import log
 from twisted.internet import reactor
+
 from autonomotorrent.BTManager import BTManager
 from autonomotorrent.factory import BTServerFactories
 from autonomotorrent.MetaInfo import BTMetaInfo
 from autonomotorrent.DHTProtocol import DHTProtocol
+
 class BTConfig(object):
     listenPort = 6881
     maxDownloadSpeed = 1024
