@@ -19,7 +19,7 @@ matches = (
            ('-AZ(?P<version>\d+)-+.+$'       , "Azureus"              ),
            ('M(?P<version>\d-\d-\d)--.+$'    , "BitTorrent"           ),
            ('T(?P<version>%s)0?-+.+$'%v64p   , "BitTornado"           ),
-           ('-UT(?P<version>[\dA-F]+)-+.+$'  , u"\xb5Torrent"         ),
+           ('-UT(?P<version>[\dA-F]+)-+.+$'  , u"microTorrent"        ),
            ('-TS(?P<version>\d+)-+.+$'       , "TorrentStorm"         ),
            ('exbc(?P<bcver>.+)LORD.+$'       , "BitLord"              ),
            ('exbc(?P<bcver>[^-][^-]+)(?!---).+$', "BitComet"          ),

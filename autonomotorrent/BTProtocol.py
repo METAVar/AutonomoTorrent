@@ -217,7 +217,7 @@ class BTProtocol(protocol.Protocol):
                     raise NotImplementedError(method_name)
 
     def handle_handshake(self, protocol, reserved, info_hash, peer_id):
-        log.msg('Connected to client ID: {0}'.format(identify_client(peer_id)))
+        log.msg('Connected to client ID: {0} v{1}'.format(*identify_client(peer_id)))
         self.peer_protocol = protocol
         self.peer_reserved = reserved
         self.peer_info_hash = info_hash
