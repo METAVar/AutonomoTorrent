@@ -143,7 +143,7 @@ class ConnectionManagerBase (IConnectionManager):
     def stop(self):
         pass
 
-class BTClientFactory (protocol.ClientFactory, ConnectionManagerBase):
+class BTClientFactory(protocol.ClientFactory, ConnectionManagerBase):
     protocol = BTClientProtocol
 
     def __init__(self, btm):

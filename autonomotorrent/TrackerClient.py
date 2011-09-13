@@ -33,11 +33,8 @@ peers = [('60.50.9.1', 14004), ('98.235.129.196', 42389), ('125.230.14.154', 113
 class BTTrackerClient (object):
     def __init__(self, btm):
         self.btm = btm
-
         self.reciever = btm.connectionManager.clientFactory
-        
         self.timmer = {}
-
         self.interval = 15 * 60
 
     @defer.inlineCallbacks
