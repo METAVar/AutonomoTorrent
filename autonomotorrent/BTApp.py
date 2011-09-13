@@ -30,6 +30,7 @@ else:
     except:
         pass
 
+import os
 from twisted.python import log
 from twisted.internet import reactor
 from autonomotorrent.BTManager import BTManager

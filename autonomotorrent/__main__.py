@@ -16,6 +16,7 @@ def main(opt, btfiles):
             app.add_torrent(config)
 
         except:
+            log.err()
             log.err("Failed to add {0}".format(torrent_file))
 
     app.start_reactor()
