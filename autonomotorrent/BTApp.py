@@ -17,19 +17,6 @@ except ImportError as err:
     print 'require twisted 10.2.0 or newer'
     exit()
 
-if sys.platform == 'win32':
-    try:
-        from twisted.internet import iocpreactor
-        iocpreactor.install()
-    except Exception as err:
-        print err
-else:
-    try:
-        from twisted.internet import epollreactor
-        epollreactor.install()
-    except:
-        pass
-
 from twisted.python import log
 from twisted.internet import reactor
 from autonomotorrent.BTManager import BTManager
