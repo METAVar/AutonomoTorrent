@@ -1,8 +1,9 @@
 #
 # -*-encoding:gb2312-*-
 
+from twisted.internet import defer
 from PieceManager import BTPieceManager
-from tools import SpeedMonitor, generate_peer_id
+from tools import SpeedMonitor, generate_peer_id, sleep
 from factory import ConnectionManager
 from TrackerClient import BTTrackerClient
 
@@ -43,6 +44,12 @@ class BTManager (object):
         self.bttrackerclient.stop()
 
         self.status = 'stopped'
+
+    def get_down_speed(self):
+        return self.downloadSpeedMonitor.speed
+
+    def get_up_speed(self):
+        return self.uploadSpeedMonitor.speed
 
     def exit(self):
         if self.status == 'running' :

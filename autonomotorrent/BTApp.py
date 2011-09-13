@@ -6,6 +6,7 @@ import os
 import os
 from twisted.python import log
 from twisted.internet import reactor
+from twisted.internet import task 
 
 from autonomotorrent.BTManager import BTManager
 from autonomotorrent.factory import BTServerFactories
@@ -29,7 +30,10 @@ class BTConfig(object):
             log.msg("File: {0} Size: {1}".format(name, size)) # TODO: Do we really need this?
             
 class BTApp:
-    def __init__(self, save_dir=".", listen_port=6881, enable_DHT=False):
+    def __init__(self, save_dir=".", 
+                       listen_port=6881, 
+                       enable_DHT=False,
+                       remote_debugging=False):
         log.startLogging(sys.stdout) # Start logging to stdout
         self.save_dir = save_dir
         self.listen_port = listen_port
@@ -37,9 +41,20 @@ class BTApp:
         self.tasks = {}
         self.btServer = BTServerFactories(self.listen_port)
         reactor.listenTCP(self.listen_port, self.btServer)
+
         if enable_DHT:
             self.dht = DHTProtocol()
             reactor.listenUDP(self.listen_port, self.dht)
+
+        if remote_debugging:
+            import twisted.manhole.telnet
+            dbg = twisted.manhole.telnet.ShellFactory()
+            dbg.username = "admin"
+            dbg.password = "admin"
+            dbg.namespace['app'] = self 
+            reactor.listenTCP(9999, dbg)
+
+        task.LoopingCall(self.get_status).start(5, now=False)
 
     def add_torrent(self, config):
         config.check()
@@ -67,6 +82,21 @@ class BTApp:
     def stop_all_torrents(self):
         for task in self.tasks.itervalues() :
             task.stopDownload()
+
+    def get_status(self):
+        """
+        """
+        status = {}
+        for torrent_hash, bt_manager in self.tasks.iteritems():
+            status[torrent_hash] = {
+                "state": bt_manager.status,
+                "download_speed": bt_manager.get_down_speed(),
+                "upload_speed": bt_manager.get_up_speed(),
+                #"active_connections": bt_manager.get_active_connections(),
+                }
+
+        log.msg("Status: {}".format(status))
+        return status
 
     def start_reactor(self):
         reactor.run()
