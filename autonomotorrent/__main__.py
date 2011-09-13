@@ -110,12 +110,16 @@ class BTApp:
 def main(opt, btfiles):
     app = BTApp(opt.enable_dht)
     for torrent_file in btfiles:
-        log.msg('Adding: {0}'.format(torrent_file))
-        config = BTConfig(torrent_file)
-        config.downloadList = None
-        config.saveDir = opt.saveDir
-        config.listenPort = opt.listenPort
-        app.add_torrent(config)
+        try:
+            log.msg('Adding: {0}'.format(torrent_file))
+            config = BTConfig(torrent_file)
+            config.downloadList = None
+            config.saveDir = opt.saveDir
+            config.listenPort = opt.listenPort
+            app.add_torrent(config)
+
+        except:
+            log.err("Failed to add {0}".format(torrent_file))
 
     app.start_reactor()
 
