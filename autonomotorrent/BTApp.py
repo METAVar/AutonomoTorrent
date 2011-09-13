@@ -43,10 +43,13 @@ class BTApp:
         reactor.listenTCP(self.listen_port, self.btServer)
 
         if enable_DHT:
+            log.msg("Turning DHT on.")
             self.dht = DHTProtocol()
             reactor.listenUDP(self.listen_port, self.dht)
 
         if remote_debugging:
+            log.msg("Turning remote debugging on. You may login via telnet " +\
+                "on port 9999 username & password are 'admin'")
             import twisted.manhole.telnet
             dbg = twisted.manhole.telnet.ShellFactory()
             dbg.username = "admin"
