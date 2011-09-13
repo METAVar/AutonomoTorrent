@@ -13,17 +13,11 @@ from autonomotorrent.MetaInfo import BTMetaInfo
 from autonomotorrent.DHTProtocol import DHTProtocol
 
 class BTConfig(object):
-    # FIXME: I don't think these are used...
-    #maxDownloadSpeed = 1024 
-    #maxUploadSpeed = 1024
-
     def __init__(self, torrentPath) :
         self.torrentPath = torrentPath
         self.metainfo = BTMetaInfo(torrentPath)
         self.info_hash = self.metainfo.info_hash
         self.downloadList = None
-        self.saveDir = '.'
-        self.rootDir = self.metainfo.topDir
 
     def check(self) :
         if self.downloadList is None:
@@ -33,12 +27,11 @@ class BTConfig(object):
             size = f['length']
             name = f['path']
             log.msg("File: {0} Size: {1}".format(name, size)) # TODO: Do we really need this?
-
-        self.rootDir = os.path.join(self.saveDir, self.rootDir)
             
 class BTApp:
-    def __init__(self, listen_port=6881, enable_DHT=False):
+    def __init__(self, save_dir=".", listen_port=6881, enable_DHT=False):
         log.startLogging(sys.stdout) # Start logging to stdout
+        self.save_dir = save_dir
         self.listen_port = listen_port
         self.enable_DHT = enable_DHT
         self.tasks = {}

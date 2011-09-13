@@ -5,14 +5,14 @@ from twisted.python import log
 from autonomotorrent.BTApp import BTApp, BTConfig
 
 def main(opt, btfiles):
-    app = BTApp(enable_DHT=opt.enable_dht)
+    app = BTApp(save_dir=opt.save_dir, 
+                listen_port=opt.listen_port, 
+                enable_DHT=opt.enable_dht)
     for torrent_file in btfiles:
         try:
             log.msg('Adding: {0}'.format(torrent_file))
             config = BTConfig(torrent_file)
             config.downloadList = None
-            config.saveDir = opt.saveDir
-            config.listenPort = opt.listenPort
             app.add_torrent(config)
 
         except:
@@ -27,11 +27,11 @@ def console():
     usage = 'usage: %prog [options] torrent1 torrent2 ...'
     parser = OptionParser(usage=usage)
     parser.add_option('-o', '--output_dir', action='store', type='string',
-                      dest='saveDir', default='.', metavar='SaveDir', 
+                      dest='save_dir', default='.', 
                       help='save download file to which directory')
 
-    parser.add_option('-p', '--port', action='store', type='int',
-                     dest='listenPort', default=6881, metavar='LISTEN-PORT',
+    parser.add_option('-l', '--listen-port', action='store', type='int',
+                     dest='listen_port', default=6881, 
                      help='the listen port')
 
     parser.add_option("-d", "--enable_dht", action="store_true",

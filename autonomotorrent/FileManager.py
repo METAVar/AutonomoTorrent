@@ -236,7 +236,6 @@ class BTFiles :
             
 class BTFileManager :
     '''
-    需要下载的文件
     '''
 
     slice_size = 2**14
@@ -252,9 +251,9 @@ class BTFileManager :
         self.piece_length = metainfo.piece_length
         self.pieceNum = metainfo.pieces_size
 
-        self.btfiles = BTFiles(metainfo, self.config.saveDir, self.config.downloadList)
+        self.btfiles = BTFiles(metainfo, self.btm.app.save_dir, self.config.downloadList)
         self.bitfieldHave, self.bitfieldNeed = self.btfiles.getBitfield()
-        log.msg("Saving to: {0}".format(self.config.saveDir))
+        log.msg("Saving to: {0}".format(self.btm.app.save_dir))
         self.buffer_reserved = {} # 永驻内存的块，并且单独保存，主要针对文件边界所在的块
         self.buffer_max_size = 100 * 2**20 / self.piece_length # 100M缓冲大小
 
