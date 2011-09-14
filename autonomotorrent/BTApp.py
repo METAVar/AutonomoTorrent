@@ -87,7 +87,7 @@ class BTApp:
             task.stopDownload()
 
     def get_status(self):
-        """
+        """Returns a dictionary of stats on every torrent and total speed.
         """
         status = {}
         for torrent_hash, bt_manager in self.tasks.iteritems():
