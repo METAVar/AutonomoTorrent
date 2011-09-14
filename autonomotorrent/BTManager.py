@@ -51,6 +51,11 @@ class BTManager (object):
     def get_up_speed(self):
         return self.uploadSpeedMonitor.speed
 
+    def get_num_connections(self):
+        return {
+            "client": len(self.connectionManager.clientFactory.active_connection),
+            "server": len(self.connectionManager.serverFactory.active_connection)}
+
     def exit(self):
         if self.status == 'running' :
             self.stopDownload()

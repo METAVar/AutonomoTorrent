@@ -112,7 +112,6 @@ class ConnectionManagerBase (IConnectionManager):
 
     def addActiveConnection(self, peerid, connection):
         peerid = connection.peer_id
-        
         self.active_connection[peerid] = connection
 
     def removeActiveConnection(self, peerid):

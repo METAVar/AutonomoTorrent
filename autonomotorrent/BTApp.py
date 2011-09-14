@@ -95,6 +95,7 @@ class BTApp:
                 "state": bt_manager.status,
                 "download_speed": bt_manager.get_down_speed(),
                 "upload_speed": bt_manager.get_up_speed(),
+                "num_connections": bt_manager.get_num_connections(),
                 #"active_connections": bt_manager.get_active_connections(),
                 }
 
