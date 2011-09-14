@@ -93,10 +93,8 @@ class BTApp:
         for torrent_hash, bt_manager in self.tasks.iteritems():
             status[torrent_hash] = {
                 "state": bt_manager.status,
-                "download_speed": bt_manager.get_down_speed(),
-                "upload_speed": bt_manager.get_up_speed(),
+                "speed": bt_manager.get_speed(),
                 "num_connections": bt_manager.get_num_connections(),
-                #"active_connections": bt_manager.get_active_connections(),
                 }
 
         log.msg("Status: {}".format(status))

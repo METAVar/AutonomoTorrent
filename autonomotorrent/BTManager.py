@@ -13,8 +13,8 @@ class BTManager (object):
         self.config = config
         self.metainfo = config.metainfo
         self.info_hash = self.metainfo.info_hash
-        self.downloadSpeedMonitor = SpeedMonitor()
-        self.uploadSpeedMonitor = SpeedMonitor()
+        self.downloadSpeedMonitor = SpeedMonitor(5)
+        self.uploadSpeedMonitor = SpeedMonitor(5)
         self.my_peer_id = generate_peer_id()
         self.connectionManager = ConnectionManager(self)
         self.pieceManager = BTPieceManager(self)
@@ -45,11 +45,12 @@ class BTManager (object):
 
         self.status = 'stopped'
 
-    def get_down_speed(self):
-        return self.downloadSpeedMonitor.speed
-
-    def get_up_speed(self):
-        return self.uploadSpeedMonitor.speed
+    def get_speed(self):
+        """Returns the speed in kibibit per second (Kibit/s).
+        """
+        return {
+            "down": self.downloadSpeedMonitor.get_speed(),
+            "up":   self.uploadSpeedMonitor.get_speed()  }
 
     def get_num_connections(self):
         return {

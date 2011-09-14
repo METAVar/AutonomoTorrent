@@ -19,7 +19,7 @@ class BTDownload(object) :
         self.peer_choke = None
         self.am_interested = None
 
-        self.downloadSpeedMonitor = SpeedMonitor(10)
+        self.downloadSpeedMonitor = SpeedMonitor()
 
         self.task_max_size = 5
 

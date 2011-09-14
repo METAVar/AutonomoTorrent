@@ -4,6 +4,7 @@ import hashlib
 import time, os
 
 from twisted.internet import reactor, defer
+from twisted.python import log
 
 def sleep(timeout):
     df = defer.Deferred()
@@ -29,6 +30,11 @@ def dns_resolve(addr):
         defer.returnValue(addr)
 
 class SpeedMonitor (object):
+    """A generic network speed monitor.
+    
+    @param period the time window for each individual measurement; if this is
+    not set, the SpeedMonitor will not take measurements! 
+    """
     def __init__(self, period=None):
         self.bytes = 0
         self.start_time = None
@@ -77,7 +83,15 @@ class SpeedMonitor (object):
         self.time_record = curTime
         self.bytes_record = self.bytes
 
-        # print '当前速率 %d B/s' % int(self.speed)
+    def get_speed(self):
+        """Returns the speed in kibibit per second (Kibit/s) no matter what the
+        period was. Returns None is period is None. 
+
+        """
+        if self.speed and self.period:
+            return self.speed  / 1024
+        else:
+            return None
 
 def generate_peer_id():
     myid = 'M' + '7-2-0' + '--' # 8

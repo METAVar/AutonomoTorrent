@@ -14,7 +14,7 @@ class BTUpload (object) :
         self.peer_interested = None
         self.am_choke = None
 
-        self.uploadSpeedMonitor = SpeedMonitor(10)
+        self.uploadSpeedMonitor = SpeedMonitor()
 
         self.upload_todo = []
         self.upload_doing = []
