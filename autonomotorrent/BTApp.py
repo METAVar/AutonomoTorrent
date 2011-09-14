@@ -96,6 +96,15 @@ class BTApp:
                 "speed": bt_manager.get_speed(),
                 "num_connections": bt_manager.get_num_connections(),
                 }
+            try:
+                status["all"]["speed"]["up"] += status[torrent_hash]["speed"]["up"] 
+                status["all"]["speed"]["down"] += status[torrent_hash]["speed"]["down"] 
+            except KeyError:
+                status["all"] = {"speed": 
+                        {"up": status[torrent_hash]["speed"]["up"], 
+                        "down": status[torrent_hash]["speed"]["down"]}, 
+                    }
+
 
         log.msg("Status: {}".format(status))
         return status
