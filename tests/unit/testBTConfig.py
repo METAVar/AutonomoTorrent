@@ -4,22 +4,18 @@ import unittest
 from autonomotorrent.BTApp import BTApp, BTConfig
 
 class testBTConfig(unittest.TestCase):
+    """Tests the BT Config which holds information for a single torrent.
     """
-    """
-    def setUp(self):
-        """
-        """
-        pass
-
     def test_bt_file(self):
+        """Tests the config using a BT meta file on disk.
         """
-        """
-        config = BTConfig(torrent_path="tests/damn_small_linux.torrent")
+        config = BTConfig(torrent_path="tests/unit/damn_small_linux.torrent")
         self.assertNotEqual(config, None)
         config.check()
 
     def test_full_meta_info(self):
-        """
+        """Tests the config using a hardcoded meta info dicionarity with most
+        of the values.
         """
         full_torrent = {'creation date': 1316733309, 'announce':
         'http://107.10.137.161:8082/announce', 'info': {'length': 26039, 
@@ -33,7 +29,8 @@ class testBTConfig(unittest.TestCase):
         config.check()
 
     def test_minimal_meta_info(self):
-        """
+        """Tests the config using a hardcoded meta info dicionarity with the
+        minimal set of values/keys.
         """
         min_torrent = {'info': {'length': 26039, 
         'piece length': 2048, 'name': '378ae2e61395da95c3cddf7d2acfc491.png',

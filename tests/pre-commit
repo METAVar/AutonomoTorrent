@@ -1,0 +1,250 @@
+#!/usr/bin/env python
+"""
+A pre-commit hook for git that uses Pylint for automated code review.
+ 
+If any python file's rating falls below the ``PYLINT_PASS_THRESHOLD``, this
+script will return nonzero and the commit will be rejected.
+
+To use this, create a symbolic link to this from .git/hooks/
+   cd .git/hooks && ln -s ../../tests/pre-commit
+ 
+Copyright 2009 Nick Fitzgerald - MIT Licensed.
+Changes by Josh Ziegler 2011
+"""
+import os
+import re
+import sys
+ 
+from subprocess import Popen, PIPE
+ 
+# Threshold for code to pass the Pylint test. 10 is the highest score Pylint
+# will give to any peice of code.
+PYLINT_PASS_THRESHOLD = 7
+PYGENIE = os.path.join("tests", "complexity", "pygenie.py") 
+DOCTEST_FAIL = re.compile(r"\*\*\*Test Failed\*\*\*")
+PYLINT_SCORE = re.compile(r"Your code has been rated at (-?[\d\.]+)/10")
+PYLINT_REGEX = re.compile(r"""([A-Z]:  |  # Error lines
+                               \*\*\*\* ) # File separators
+                               """, re.VERBOSE)
+COMPLEXITY_OK = re.compile(r"This code looks all good!")
+COMPLEXITY_SCORE = re.compile(r"\w    (?P<unit>\w+(\.\w+)*) (?P<score>\d{1,4})")
+SPHINX_ERROR = re.compile(r"""(ERROR|WARNING)""", re.IGNORECASE)
+SPHINX_OK = re.compile(r"""build succeeded""")
+
+SEPARATOR = "*".join('*' for i in xrange(30))
+
+def is_py_script(filename):
+    """Returns True if a file is a python executable."""
+    if not os.access(filename, os.X_OK):
+        return False
+    else:
+        try:
+            first_line = open(filename, "r").next().strip()
+            return "#!" in first_line and "python" in first_line
+        except StopIteration:
+            return False
+
+def __get_py_files_changed():
+    """Returns all file paths of python files which have changed with this
+    commit.
+       """
+    # Run the git command that gets the filenames of every file that has been
+    # locally modified since the last commit.
+    sub = Popen("git diff --staged --name-only HEAD".split(), stdout=PIPE)
+    sub.wait()
+
+    # Filter out non-python or deleted files.
+    py_files_changed = []
+    for file_name in [f.strip() for f in sub.stdout.readlines()]:
+        if (file_name.endswith(".py") and os.path.exists(file_name))  \
+               or is_py_script(file_name):
+            py_files_changed.append(file_name)
+
+    return py_files_changed
+
+def __get_all_py_files(base_dir=".."):
+    """Returns all of the python files in the base directory.
+       """
+    py_files = []
+    for root, dirs, files in os.walk(base_dir):
+        for file_path in files:
+            if file_path[-3:] == ".py":
+                path = os.path.join(root, file_path)
+                path = os.path.abspath(path) # Normalize the path
+                py_files.append(path)
+    return py_files
+
+def print_header(section_name):
+    """Prints a large header to make the section stand out.
+       """
+    print '\n\n'
+    print SEPARATOR 
+    print "      *** " + section_name + " ***"
+    print SEPARATOR 
+
+def print_failures(failures):
+    """Prints a simple message with the file method and its' score if given.
+       """
+    for (file_name, score) in failures.iteritems():
+        if score:
+            print "[ FAIL ] %s : %s" % (file_name, score)
+        else:
+            print "[ FAIL ] %s" % (file_name, )
+
+def query_user_for_files_to_test():
+    """Asks the user if they want to test all of the python files and where
+    from.
+       """
+    print "No files found in staging area!"
+    try:
+        answer = raw_input("Run tests on all files? (y/[n]): ")
+    except:
+        answer = 'n'
+
+    if answer == "y":
+        default_path = os.path.abspath("")
+        new_path = raw_input("Directory to scan for python files: [" + \
+            default_path + "]: ")
+        if new_path == "":
+            new_path = default_path
+        files_to_test = __get_all_py_files(new_path)
+
+    else:
+        sys.exit(0)
+
+    return files_to_test
+
+def main():
+    """Checks your git commit with Pylint!"""
+    failed = False
+    tests_failing = []
+    files_changed = __get_py_files_changed() 
+    if not files_changed:
+        files_changed = query_user_for_files_to_test()
+
+    print_header("Running Sphinx Doc Build Test")
+    sphinx_failures     = run_sphinx_test()
+    print_header("Running Doc Tests")
+    doctest_failures    = run_doc_test(files_changed)
+    print_header("Running Pylint Tests")
+    pylint_failures     = run_pylint_test(files_changed)
+    print_header("Running Cyclomatic Complexity Tests")
+    complexity_failures = run_complexity_test(files_changed)
+
+    # If any of the files failed the tests, stop the commit from continuing.
+    # and list which are failing
+    print_header("Composite Test Results")
+    if len(sphinx_failures) > 0:
+        print "Sphinx Doc Build Test Failures:"
+        failed = True
+        tests_failing.append("sphinx")
+        print_failures(sphinx_failures)
+
+    if len(doctest_failures) > 0:
+        print "Doc Test Failures:"
+        failed = True
+        tests_failing.append("doctest")
+        print_failures(doctest_failures)
+
+    if len(pylint_failures) > 0:
+        print "Pylint Test Failures: (must be above 7)"
+        failed = True
+        tests_failing.append("plylint")
+        print_failures(pylint_failures)
+
+    if len(complexity_failures) > 0:
+        print "Complexity Test Failures (must be under 8)"
+        failed = True
+        tests_failing.append("complexity")
+        print_failures(complexity_failures)
+
+    if failed:
+        print "\ngit: fatal: commit failed, " + ', '.join(tests_failing) \
+            + " tests failing."
+        sys.exit(1)
+    else:
+        print "All Tests Passed!"
+
+def run_doc_test(files_changed):
+    """Runs the standard docstring tests, which looks for documentation that
+    appears to be intereactive sessions and makes sure they work as written.
+       """
+    failures = {} # filename: score (if applicable)
+    for f_name in files_changed:
+        doctest = Popen(("python -m doctest %s" % f_name).split(), stdout=PIPE)
+        doctest.wait()
+
+        for line in doctest.stdout:
+            print line.rstrip('\n')
+            if DOCTEST_FAIL.match(line):
+                failures[f_name] = None
+
+    return failures
+
+def run_sphinx_test():
+    """Builds the project documentation using Sphinx.  If it succeeds with
+    fewer than 10 warnings, this test will pass.
+       """
+    failures = {} # filename : score (if applicable)
+    test = Popen(("python setup.py build_sphinx").split(), stdout=PIPE)
+    test.wait()
+
+    failed = False # Assume success by default  
+    for line in test.stdout:
+        if SPHINX_ERROR.search(line):
+            print line.rstrip('\n')
+            failed = True
+
+    if failed:
+        failures['All Docs'] = None
+
+    return failures
+
+def run_pylint_test(files_changed):
+    """Run Pylint on each file, collect the results, and display them for the
+       user.
+       """
+    failures = {} # filename: score (if applicable)
+    for f_name in files_changed:
+        doctest = Popen(("pylint -f text %s" % f_name).split(), stdout=PIPE,
+            stderr=PIPE)
+        doctest.wait()
+
+        for line in doctest.stdout:
+            if PYLINT_SCORE.match(line):
+                score = float(PYLINT_SCORE.match(line).group(1))
+
+                if score < PYLINT_PASS_THRESHOLD: 
+                    failures[f_name] = score
+
+            if PYLINT_REGEX.match(line):
+                pretty_line = line.rstrip('\n').lstrip('* ')
+                if pretty_line[1] == ":":
+                    print "   ", pretty_line
+                else:
+                    print pretty_line
+                
+    return failures
+
+def run_complexity_test(files_changed):
+    """Run cyclomatic complexity test on each file, collect the results, and 
+    display them for the user.
+       """
+    failures = {} # filename: score (if applicable)
+    for f_name in files_changed:
+        doctest = Popen((PYGENIE + " complexity " + f_name).split(), 
+            stdout=PIPE)
+        doctest.wait()
+
+        for line in doctest.stdout:
+            if COMPLEXITY_SCORE.match(line):
+                match = COMPLEXITY_SCORE.match(line)
+                score = match.group('score')
+                unit = match.group('unit')
+                failures[f_name] = score
+                print f_name, ":", unit, "[Score:", score + "]"
+                
+    return failures
+ 
+if __name__ == "__main__":
+    main()   
