@@ -14,9 +14,15 @@ from autonomotorrent.MetaInfo import BTMetaInfo
 from autonomotorrent.DHTProtocol import DHTProtocol
 
 class BTConfig(object):
-    def __init__(self, torrentPath) :
-        self.torrentPath = torrentPath
-        self.metainfo = BTMetaInfo(torrentPath)
+    def __init__(self, torrent_path=None, meta_info=None):
+        if torrent_path:
+            #self.torrentPath = torrent_path #TODO: Do we need this?
+            self.metainfo = BTMetaInfo(path=torrent_path)
+        elif meta_info:
+            self.metainfo = BTMetaInfo(meta_info=meta_info)
+        else:
+            raise Exception("Must provide either a torrent path or meta_info.")
+
         self.info_hash = self.metainfo.info_hash
         self.downloadList = None
 

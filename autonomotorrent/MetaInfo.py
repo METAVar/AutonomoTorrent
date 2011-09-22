@@ -6,21 +6,32 @@ import os
 
 from bencode import bencode, bdecode
 
+from twisted.python import log
+
 class BTMetaInfo:
-    '''
-    对应于torrent文件
-    '''
-    
+    """ 
+    """ 
     encoding = 'utf-8'
 
-    def __init__(self, btfile):
-        ct = open(btfile, 'rb').read()
-        metainfo = bdecode(ct)
+    def __init__(self, path=None, meta_info=None):
+        if path:
+            ct = open(path, 'rb').read()
+            metainfo = bdecode(ct)
+            log.msg(metainfo)
+        elif meta_info:
+            metainfo = meta_info
+        else:
+            raise Exception("Must pass either a BT meta file path or the " +\
+                "meta  info itself!")
         self.metainfo = metainfo
 
-        self.announce_list = [metainfo['announce']]
-        if 'announce-list' in metainfo:
-            self.announce_list += reduce(lambda x,y: x+y, metainfo['announce-list'])
+        if 'announce' in metainfo:
+            self.announce_list = [metainfo['announce']]
+            if 'announce-list' in metainfo:
+                self.announce_list += reduce(lambda x,y: x+y, metainfo['announce-list'])
+        else:
+            log.msg("Trackerless torrent??? FIXME")
+
 
         if 'encoding' in metainfo:
             self.encoding = metainfo['encoding']
@@ -45,20 +56,13 @@ class BTMetaInfo:
                 _path = [name] + [p.decode(self.encoding) for p in _d['path']]
                 _path = os.path.join(*_path)
                 _d['path'] = _path
-
                 _start = cur_size
                 _stop = cur_size + _d['length']
                 cur_size = _stop
-
                 _d['pos_range'] = _start, _stop
-
                 self.files.append(_d)
-
-                # print _d['piece'], _d['offset']
                 
             self.total_length = cur_size                
-            # print divmod(self.total_length, self.piece_length)
-            # print self.pieces_size
             self.topDir = name
                 
         else:
@@ -82,6 +86,3 @@ class BTMetaInfo:
         for f in self.files:
             yield f
 
-
-if __name__ == '__main__':
-    print BTMetaInfo('test.torrent')
