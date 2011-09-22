@@ -106,7 +106,7 @@ class BTApp:
                     }
 
 
-        log.msg("Status: {}".format(status))
+        log.msg("Status: {0}".format(status,))
         return status
 
     def start_reactor(self):
