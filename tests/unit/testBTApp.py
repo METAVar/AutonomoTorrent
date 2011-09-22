@@ -19,7 +19,7 @@ class testBTApp(unittest.TestCase):
         config = BTConfig(torrent_path="tests/unit/damn_small_linux.torrent")
         self.bt_app.add_torrent(config)
         reactor.callLater(2.5, reactor.stop)
-        #self.bt_app.start_reactor()
+        self.bt_app.start_reactor()
 
     def test_using_dict_trackerless_single_file(self):
         """Tests BTApp using a hard-coded minimal torrent meta dictionary with

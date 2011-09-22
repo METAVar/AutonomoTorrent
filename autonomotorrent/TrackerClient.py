@@ -51,7 +51,7 @@ class BTTrackerClient (object):
             'peer_id' : peer_id,
             'port' : port,
             'compact' : 1,
-            'key' : 'abcd', 
+            #'key' : 'abcd', # This is optional anyways
             'uploaded' : 0,
             'downloaded' : 0,
             'left' : 100,
