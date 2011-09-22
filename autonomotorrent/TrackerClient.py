@@ -53,7 +53,7 @@ class BTTrackerClient (object):
             'compact' : 1,
             'key' : 'abcd', 
             'uploaded' : 0,
-            'download' : 0,
+            'downloaded' : 0,
             'left' : 100,
             'event' : 'started'
             }
@@ -99,7 +99,7 @@ class BTTrackerClient (object):
                     peers = peers[6:]
                 log.msg('Received {0} peers from tracker: {1}'.format(len(peers_list), url))
 
-                self.reciever.updateTrackerPeers(peers_list)
+                self.btm.add_peers(peers_list)
             
                 interval = res.get('interval', self.interval)
 

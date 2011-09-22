@@ -18,7 +18,12 @@ class BTManager (object):
         self.my_peer_id = generate_peer_id()
         self.connectionManager = ConnectionManager(self)
         self.pieceManager = BTPieceManager(self)
-        self.bttrackerclient = BTTrackerClient(self) # 管理对tracker服务器的连接
+        if not self.config.trackerless:
+            if len(self.metainfo.announce_list) > 0:
+                self.bttrackerclient = BTTrackerClient(self)
+            else: 
+                raise Exception("Need at least one tracker if torrent is "+\
+                    "not trackerless.")
         self.status = None
 
     def startDownload(self):
@@ -29,7 +34,8 @@ class BTManager (object):
         self.downloadSpeedMonitor.start()
         self.uploadSpeedMonitor.start()
 
-        self.bttrackerclient.start() # 从tracker服务器更新peers list
+        if not self.config.trackerless:
+            self.bttrackerclient.start()
 
         self.status = 'running'
 
@@ -41,7 +47,8 @@ class BTManager (object):
         self.downloadSpeedMonitor.stop()
         self.uploadSpeedMonitor.stop()
 
-        self.bttrackerclient.stop()
+        if not self.config.trackerless:
+            self.bttrackerclient.stop()
 
         self.status = 'stopped'
 
@@ -56,6 +63,14 @@ class BTManager (object):
         return {
             "client": len(self.connectionManager.clientFactory.active_connection),
             "server": len(self.connectionManager.serverFactory.active_connection)}
+
+    def add_peers(self, peers):
+        """Adds peers to the torrent for downloading pieces.
+
+        @param peers list of tuples e.g. [('173.248.194.166', 12005),
+            ('192.166.145.8', 13915)]
+        """
+        self.connectionManager.clientFactory.updateTrackerPeers(peers)
 
     def exit(self):
         if self.status == 'running' :

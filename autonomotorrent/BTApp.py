@@ -14,7 +14,8 @@ from autonomotorrent.MetaInfo import BTMetaInfo
 from autonomotorrent.DHTProtocol import DHTProtocol
 
 class BTConfig(object):
-    def __init__(self, torrent_path=None, meta_info=None):
+    def __init__(self, torrent_path=None, meta_info=None, trackerless=False):
+        self.trackerless = trackerless
         if torrent_path:
             #self.torrentPath = torrent_path #TODO: Do we need this?
             self.metainfo = BTMetaInfo(path=torrent_path)

@@ -17,7 +17,6 @@ class BTMetaInfo:
         if path:
             ct = open(path, 'rb').read()
             metainfo = bdecode(ct)
-            log.msg(metainfo)
         elif meta_info:
             metainfo = meta_info
         else:
@@ -29,9 +28,8 @@ class BTMetaInfo:
             self.announce_list = [metainfo['announce']]
             if 'announce-list' in metainfo:
                 self.announce_list += reduce(lambda x,y: x+y, metainfo['announce-list'])
-        else:
-            log.msg("Trackerless torrent??? FIXME")
-
+        else: # Trackerless torrent?
+            self.announce_list = []
 
         if 'encoding' in metainfo:
             self.encoding = metainfo['encoding']
@@ -69,6 +67,7 @@ class BTMetaInfo:
             _d = {}
             _d['path'] = name
             _d['length'] = info['length']
+            _d['pos_range'] = 0, info['length'] # TODO: Is this right?
             self.files.append(_d)
             self.total_length = info['length']
 
