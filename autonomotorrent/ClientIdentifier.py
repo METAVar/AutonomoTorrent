@@ -45,8 +45,8 @@ matches = (
            ('OP(?P<strver>\d{4}).+$'         , "Opera"                ),
            ('-KT(?P<version>\d+)(?P<rc>R\d+)-+.+$', "KTorrent"        ),
 # Unknown but seen in peer lists:
-           ('-S(?P<version>10059)-+.+$'      , "S (unknown)"          ),
-           ('-TR(?P<version>\d+)-+.+$'       , "TR (unknown)"         ),
+           ('-S(?P<version>10059)-+.+$'      , "Shareaza"             ),
+           ('-TR(?P<version>\d+)-+.+$'       , "Transmission"         ),
            ('S\x05\x07\x06\x00{7}.+'         , "S 576 (unknown)"      ),
 # Clients I've never actually seen in a peer list:           
            ('exbc..---.+$'                   , "BitVampire 1.3.1"     ),
