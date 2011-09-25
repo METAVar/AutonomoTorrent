@@ -3,7 +3,7 @@ This is a fork of [ABTorrent](http://code.google.com/p/abtorrent/) which is a
 pure Python implementation of a minimal BitTorrent client. The name 
 AutonomoTorrent is short for Autonomous Torrent.  Autonomous in this context 
 [means](http://www.merriam-webster.com/dictionary/autonomous) "existing or
-capable of existing independently," which refers to its' pure Python nature.  
+capable of existing independently," which refers to its pure Python nature.  
     
 Autonomo came about because I wanted to use BitTorrent in another Python
 project of mine ([AdroitGM](https://github.com/joshsziegler/AdroitGM)), but 
