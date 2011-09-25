@@ -17,7 +17,12 @@ setup(
     #author = "Josh S. Ziegler",
     author_email = "josh.s.ziegler@gmail.com",
     description = "AutonomoTorrent %s" % autonomotorrent.__version__,
-    long_description = """A minima, pure-python BitTorrent client.
+    long_description = """A minimal, pure-python BitTorrent client.
+
+        Supports:
+            - DHT
+            - Multi-trackers
+            - Trackerless mode & Global peers pool
         """,
     license = "GPLv3",
     keywords = "bittorrent client",
@@ -26,7 +31,7 @@ setup(
         'Topic :: Internet',
         'Intended Audience :: Developers',
         'Intended Audience :: End Users/Desktop',
-        'Development Status :: 2 - Pre-Alpha',
+        'Development Status :: 3 - Alpha',
         'License :: OSI Approved :: GNU General Public License (GPL)',
     ],
     # End Meta-Data
