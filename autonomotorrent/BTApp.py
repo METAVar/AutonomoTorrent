@@ -40,7 +40,14 @@ class BTApp:
     def __init__(self, save_dir=".", 
                        listen_port=6881, 
                        enable_DHT=False,
-                       remote_debugging=False):
+                       remote_debugging=False, 
+                       global_peers=None):
+        """
+        @param remote_degugging enables telnet login via port 9999 with a
+            username and password of 'admin'
+        @param global_peers list of tuples e.g. [('173.248.194.166', 12005),
+            ('192.166.145.8', 13915)]
+        """
         log.startLogging(sys.stdout) # Start logging to stdout
         self.save_dir = save_dir
         self.listen_port = listen_port
@@ -48,6 +55,10 @@ class BTApp:
         self.tasks = {}
         self.btServer = BTServerFactories(self.listen_port)
         reactor.listenTCP(self.listen_port, self.btServer)
+        if global_peers:
+            self.global_peer_pool = set(global_peers)
+        else:
+            self.global_peer_pool = set() 
 
         if enable_DHT:
             log.msg("Turning DHT on.")
@@ -66,16 +77,28 @@ class BTApp:
 
         task.LoopingCall(self.get_status).start(5, now=False)
 
+    def add_global_peers(self, peer_list):
+        """
+        @param peer_list list of tuples e.g. [('173.248.194.166', 12005),
+            ('192.166.145.8', 13915)]
+        """
+        self.global_peer_pool.union(peers)
+        for torrent_manager in self.tasks.itervalues():
+            # TODO: Change to set_global_peers?  Why??
+            torrent_manager.add_peers(list(self.global_peer_pool))
+
     def add_torrent(self, config):
         config.check()
-        hs = config.info_hash
-        if hs in self.tasks:
-            log.msg('{0} is already in download list'.format(hs))
+        info_hash = config.info_hash
+        if info_hash in self.tasks:
+            log.msg('{0} is already in download list'.format(info_hash))
         else:
             btm = BTManager(self, config)
-            self.tasks[hs] = btm
+            if len(self.global_peer_pool) > 0:
+                btm.add_peers(list(self.global_peer_pool))
+            self.tasks[info_hash] = btm
             btm.startDownload()
-            return hs
+            return info_hash 
 
     def stop_torrent(self, key):
         info_hash = key
