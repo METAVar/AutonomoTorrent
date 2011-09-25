@@ -14,7 +14,7 @@ if os.path.exists('build/'): shutil.rmtree('build/')
 setup(
     name = "AutonomoTorrent",
     version = autonomotorrent.__version__,
-    #author = "Josh S. Ziegler",
+    author = "Josh S. Ziegler",
     author_email = "josh.s.ziegler@gmail.com",
     description = "AutonomoTorrent %s" % autonomotorrent.__version__,
     long_description = """A minimal, pure-python BitTorrent client.
