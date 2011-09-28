@@ -335,13 +335,10 @@ class RoutingTable :
 
     @classmethod
     def load(self):
-        if os.path.exists(self.pkl_file):
-            try:
-                fp = bz2.BZ2File(self.pkl_file, 'r')
-                return pickle.load(fp)
-            except:
-                pass
-        else:
+        try:
+            fp = bz2.BZ2File(self.pkl_file, 'r')
+            return pickle.load(fp)
+        except:
             return RoutingTable()
 
     def dump(self):
@@ -656,7 +653,7 @@ class DHTProtocol (DHTProtocolBase) :
 
     def startProtocol(self):
         #print 'startProtocol'
-        # self.routingTable = RoutingTable()
+        #self.routingTable = RoutingTable()
         self.routingTable = RoutingTable.load()
 
         self.my_node_id = self.routingTable.my_node_id
