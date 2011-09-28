@@ -334,10 +334,13 @@ class RoutingTable :
     pkl_file = 'DHT.dat'
 
     @classmethod
-    def load(cls):
-        if os.path.exists(cls.pkl_file):
-            with bz2.BZ2File(cls.pkl_file, 'r') as fp:
+    def load(self):
+        if os.path.exists(self.pkl_file):
+            try:
+                fp = bz2.BZ2File(self.pkl_file, 'r')
                 return pickle.load(fp)
+            except:
+                pass
         else:
             return RoutingTable()
 
@@ -347,8 +350,11 @@ class RoutingTable :
         rt = self.bucket
         self.bucket = []
 
-        with bz2.BZ2File(self.pkl_file, 'w') as fp:
+        try:
+            fp = bz2.BZ2File(self.pkl_file, 'w') 
             pickle.dump(self, fp)
+        except:
+            pass
 
         self.dht = dht
         self.bucket = rt

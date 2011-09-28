@@ -2,7 +2,6 @@
 # -*-encoding:gb2312-*-
 
 import sys
-import md5
 import zlib
 
 from os.path import getsize, split, join, abspath, isdir, normpath
@@ -238,7 +237,7 @@ def make_info(file_to_torrent, piece_len_exp=None, get_hash=None):
             h = open(f, 'rb')
 
             if get_hash['md5']:
-                hash_md5 = md5.new()
+                hash_md5 = hashlib.md5()
             if get_hash['sha1']:
                 hash_sha1 = hashlib.sha1()
             if get_hash['crc32']:
@@ -287,7 +286,7 @@ def make_info(file_to_torrent, piece_len_exp=None, get_hash=None):
         h = open(file_to_torrent, 'rb')
         
         if get_hash['md5']:
-            hash_md5 = md5.new()
+            hash_md5 = hashlib.md5()
         if get_hash['crc32']:
             hash_crc32 = zlib.crc32('')
         if get_hash['sha1']:
