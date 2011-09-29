@@ -68,6 +68,8 @@ class BTTrackerClient (object):
 
     @defer.inlineCallbacks
     def getPeerList(self, url, data):
+        """TODO: This is in serious need of refactoring...
+        """
         if self.status == 'stopped':
             return
         
@@ -84,7 +86,8 @@ class BTTrackerClient (object):
             try:
                 res = bdecode(page)
             except BTError:
-                log.err("Received an invalid peer list from the tracker: {0}".format(url))
+                log.err("Received an invalid peer list from the tracker: " +\
+                    "{0}".format(url))
             else:
                 if len(res) == 1:
                     log.msg('Tracker: {0}'.format(res)) # TODO: What is this?
@@ -92,20 +95,24 @@ class BTTrackerClient (object):
 
                 peers = res['peers']
                 peers_list = []
-                while peers:
-                    try:
+                try: # Try parsing in binary format first
+                    while peers:
                         addr = socket.inet_ntoa(peers[:4])
                         port = struct.unpack('!H', peers[4:6])[0]
                         peers_list.append((addr, port))
                         peers = peers[6:]
-                    except: # Sometimes we get a peers list in the wrong formatting
-                        pass
-                log.msg('Received {0} peers from tracker: {1}'.format(len(peers_list), url))
+                except: # Now try parsing in dictionary format
+                    try:
+                        for p in peers:
+                            peers_list.append((p["ip"], p["port"]))
+                    except:
+                        log.err("Received an invalid peer list from the " +\
+                            "tracker: {0}".format(url))
 
+                log.msg('Received {0} peers from tracker: {1}'.format(
+                    len(peers_list), url))
                 self.btm.add_peers(peers_list)
-            
                 interval = res.get('interval', self.interval)
-
                 yield sleep(interval)
                 self.getPeerList(url, data)
 
