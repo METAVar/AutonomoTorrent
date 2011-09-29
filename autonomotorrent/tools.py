@@ -91,7 +91,7 @@ class SpeedMonitor (object):
         if self.speed and self.period:
             return self.speed  / 1024
         else:
-            return None
+            return 0
 
 def generate_peer_id():
     myid = 'M' + '7-2-0' + '--' # 8
