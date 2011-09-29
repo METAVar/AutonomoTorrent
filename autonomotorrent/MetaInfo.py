@@ -49,7 +49,9 @@ class BTMetaInfo:
             self.encoding = metainfo['encoding']
             
         info = metainfo['info']
-        self.info_hash = hashlib.sha1(bencode(info)).digest()
+        temp = hashlib.sha1(bencode(info))
+        self.info_hash =  temp.digest()
+        self.pretty_info_hash =  temp.hexdigest()
 
         self.piece_length = info['piece length']
 

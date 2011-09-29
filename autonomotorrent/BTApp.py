@@ -121,18 +121,24 @@ class BTApp:
         """
         status = {}
         for torrent_hash, bt_manager in self.tasks.iteritems():
-            status[torrent_hash] = {
+            pretty_hash = bt_manager.metainfo.pretty_info_hash
+            speed = bt_manager.get_speed()
+            num_connections = bt_manager.get_num_connections()
+
+            status[pretty_hash] = {
                 "state": bt_manager.status,
-                "speed": bt_manager.get_speed(),
-                "num_connections": bt_manager.get_num_connections(),
+                "speed_up": speed["up"],
+                "speed_down": speed["down"],
+                "num_seeds": num_connections["server"],
+                "num_peers": num_connections["client"],
                 }
             try:
-                status["all"]["speed"]["up"] += status[torrent_hash]["speed"]["up"] 
-                status["all"]["speed"]["down"] += status[torrent_hash]["speed"]["down"] 
+                status["all"]["speed_up"] += status[pretty_hash]["speed_up"] 
+                status["all"]["speed_down"] += status[pretty_hash]["speed_down"] 
             except KeyError:
-                status["all"] = {"speed": 
-                        {"up": status[torrent_hash]["speed"]["up"], 
-                        "down": status[torrent_hash]["speed"]["down"]}, 
+                status["all"] = {
+                    "speed_up": status[pretty_hash]["speed_up"], 
+                    "speed_down": status[pretty_hash]["speed_down"]
                     }
 
 
