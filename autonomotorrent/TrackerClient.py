@@ -93,10 +93,13 @@ class BTTrackerClient (object):
                 peers = res['peers']
                 peers_list = []
                 while peers:
-                    addr = socket.inet_ntoa(peers[:4])
-                    port = struct.unpack('!H', peers[4:6])[0]
-                    peers_list.append((addr, port))
-                    peers = peers[6:]
+                    try:
+                        addr = socket.inet_ntoa(peers[:4])
+                        port = struct.unpack('!H', peers[4:6])[0]
+                        peers_list.append((addr, port))
+                        peers = peers[6:]
+                    except: # Sometimes we get a peers list in the wrong formatting
+                        pass
                 log.msg('Received {0} peers from tracker: {1}'.format(len(peers_list), url))
 
                 self.btm.add_peers(peers_list)
