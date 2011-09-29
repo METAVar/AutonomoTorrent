@@ -89,7 +89,7 @@ class BTApp:
         config.check()
         info_hash = config.info_hash
         if info_hash in self.tasks:
-            log.msg('{0} is already in download list'.format(info_hash))
+            log.msg('Torrent {0} already in download list'.format(config.metainfo.pretty_info_hash))
         else:
             btm = BTManager(self, config)
             if len(self.global_peer_pool) > 0:
