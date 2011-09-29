@@ -252,8 +252,14 @@ class BTServerFactories (protocol.ServerFactory):
     def removeFactory(self, factory):
         info_hash = factory.info_hash
         if info_hash in self.maps:
-            del factory.maps
-            del self.maps[info_hash]
+            try:
+                del factory.maps
+            except:
+                pass
+            try:
+                del self.maps[info_hash]
+            except:
+                pass
     
     def resetFactory(self, protocol, info_hash):
         if info_hash in self.maps :
