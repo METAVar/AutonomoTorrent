@@ -75,8 +75,6 @@ class BTApp:
             dbg.namespace['app'] = self 
             reactor.listenTCP(9999, dbg)
 
-        task.LoopingCall(self.get_status).start(5, now=False)
-
     def add_global_peers(self, peer_list):
         """
         @param peer_list list of tuples e.g. [('173.248.194.166', 12005),
@@ -142,7 +140,6 @@ class BTApp:
                     }
 
 
-        log.msg("Status: {0}".format(status,))
         return status
 
     def start_reactor(self):
