@@ -58,10 +58,13 @@ class BTPieceManager:
     
     def amInterested(self, idx):
         if type(idx) is Bitfield:
-            for i in (self.bfNeed & idx):
-                return True
-            else:
-                return False
+            try:
+                for i in (self.bfNeed & idx):
+                    return True
+                else:
+                    return False
+            except TypeError: 
+                return False 
         else:
             return idx in self.bfNeed
 
