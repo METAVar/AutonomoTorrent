@@ -115,12 +115,7 @@ def calculate_piece_length(file_to_torrent, piece_len_exp=None):
     """
     if not piece_len_exp:  # then calculate it automatically
         size = _calcsize(file_to_torrent)
-        if size <= 1*1024*1024:         # <= 1M 
-            # If this small, we have to make sure it at least has enough pieces
-            # to properly work with most clients (~1000) 
-            # NOTE: Using BT with pieces this small is inefficient.
-            return int(size/1000)
-        elif size > 2*1024*1024*1024:   # > 2 gig =
+        if size > 2*1024*1024*1024:     # > 2 gig =
             piece_len_exp = 20          #   1 meg pieces
         elif size > 512*1024*1024:      # > 512M =
             piece_len_exp = 19          #   512K pieces
@@ -130,7 +125,7 @@ def calculate_piece_length(file_to_torrent, piece_len_exp=None):
             piece_len_exp = 17          #   128K pieces
         elif size > 4*1024*1024:        # > 4M =
             piece_len_exp = 16          #   64K pieces
-        else:                           # < 4M =
+        else:
             piece_len_exp = 15          #   32K pieces
     piece_length = 2 ** piece_len_exp
     return piece_length

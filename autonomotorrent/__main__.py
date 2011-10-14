@@ -3,6 +3,7 @@
 import os
 from twisted.python import log
 from autonomotorrent.BTApp import BTApp, BTConfig
+from autonomotorrent import __version__ as VERSION
 
 def main(opt, btfiles):
     app = BTApp(save_dir=opt.save_dir, 
@@ -23,6 +24,7 @@ def main(opt, btfiles):
     app.start_reactor()
 
 def console():
+    print("AutonomoTorrent v{0}".format(VERSION))
     from optparse import OptionParser
 
     usage = 'usage: %prog [options] torrent1 torrent2 ...'
