@@ -1,6 +1,5 @@
-#
-# -*-encoding:gb2312-*-
-
+"""
+"""
 import os
 import hashlib
 
@@ -25,19 +24,12 @@ class BTFile:
         self.path = os.path.join(saveDir, fileinfo['path'])
         self.length = fileinfo['length']
         self.piece_len = piece_len
-
         self.abs_pos0, self.abs_pos1 = fileinfo['pos_range']
-
         self.fd = None
-
         idx0, ext = divmod(self.abs_pos0, self.piece_len)
         self.idx0_piece = idx0
-
         idx1, ext = divmod(self.abs_pos1, self.piece_len)
         self.idx1_piece = idx1+1 if ext else idx1
-        
-        #print self.abs_pos0, self.abs_pos1, self.piece_len, self.idx0_piece, self.idx1_piece
-
         h, t = os.path.split(self.path)
         if not os.path.exists(h):
             os.makedirs(h)
@@ -69,14 +61,9 @@ class BTFile:
 
     def write(self, index, beg, data):
         (pb,pe), (fb,fe) = self.__getIntersection(index, beg, len(data))
-
         if pb >= pe :
             raise BTFileError("index isn't in this file")
-
         my_data = data[pb:pe]
-
-        # print len(my_data)
-
         if self.fd is None :
             if os.path.exists(self.path) :
                 length = os.path.getsize(self.path)
@@ -86,20 +73,13 @@ class BTFile:
             else :
                 fd = open(self.path, 'wb+')
                 fd.truncate(self.length)
-
             self.fd = fd
-
         self.fd.seek(fb)
-
         self.fd.write(my_data)
-
         return pb, len(my_data)
 
     def read(self, index, beg, data_len):
         (pb,pe), (fb,fe) = self.__getIntersection(index, beg, data_len)
-
-        #print pb, pe, fb, fe
-
         if pb >= pe :
             raise BTFileError("index isn't in this file")
 
@@ -131,8 +111,6 @@ class BTFile:
         return self.idx1_piece - self.idx0_piece
 
     def __contains__(self, idx) :
-        # (pb,pe), (fb,fe) = self.__getIntersection(index, 0, self.piece_len)
-        # return pb < pe
         return self.idx0_piece <= idx < self.idx1_piece
 
 
@@ -193,7 +171,6 @@ class BTFiles :
             return _ds
             
     def __getitem__(self, idx) :
-        # ds = [f[idx] for f in self.files if idx in f]
         ds = []
         for f in self.files:
             if idx in f:
@@ -254,15 +231,15 @@ class BTFileManager :
         self.btfiles = BTFiles(metainfo, self.btm.app.save_dir, self.config.downloadList)
         self.bitfieldHave, self.bitfieldNeed = self.btfiles.getBitfield()
         log.msg("Saving to: {0}".format(self.btm.app.save_dir))
-        self.buffer_reserved = {} # 永驻内存的块，并且单独保存，主要针对文件边界所在的块
-        self.buffer_max_size = 100 * 2**20 / self.piece_length # 100M缓冲大小
+        self.buffer_reserved = {} 
+        self.buffer_max_size = 100 * 2**20 / self.piece_length 
 
     def start(self) :
         self.status = 'started'
         
-        self.buffer = {}        # 缓冲piece
-        self.buffer_record = []  # 访问先后次序
-        self.buffer_dirty = {}  # 需要写入硬盘的piece
+        self.buffer = {}        
+        self.buffer_record = [] 
+        self.buffer_dirty = {} 
 
         reactor.callLater(10, self.deamon_write)
         reactor.callLater(10, self.deamon_read)
@@ -308,7 +285,6 @@ class BTFileManager :
             self.__thread_write_status = 'stopped'
             for idx, data in bfd.iteritems() :
                 if data is self.buffer_dirty[idx] :
-                    #print '删除写回硬盘的数据'
                     del self.buffer_dirty[idx]
 
         if self.__thread_write_status == 'stopped' :
@@ -327,9 +303,6 @@ class BTFileManager :
                 del self.buffer_record[:remove_count]
 
             yield sleep(10)
-
-    ############################################################
-    # 高层操作 buffer
 
     def readPiece(self, index) :
         if not (0 <= index < self.pieceNum) :
@@ -350,7 +323,6 @@ class BTFileManager :
                     assert data
                     self.buffer[idx] = data
                     self.buffer_record.append(idx)
-                    #print 'index =', idx
 
             data = self.readPiece(index)
 
@@ -368,18 +340,11 @@ class BTFileManager :
         else:
             self.bitfieldHave[index] = 1
             self.bitfieldNeed[index] = 0
-
             if index in self.buffer :
                 self.buffer[index] = piece
 
             self.buffer_dirty[index] = piece
-
-            # self.write(index, piece)
-
             return True
-
-    ############################################################
-    # 针对piece的读写，操作 buffer_dirty, buffer_reserved
 
     def read(self, index):
         if index in self.buffer_dirty:
@@ -398,10 +363,8 @@ class BTFileManager :
 
     def write(self, index, data) :
         ds = self.btfiles.write(index, data)
-        if len(ds) > 1 : # 文件边界，但是相邻文件用户并没有选择下载
-            # print len(data), length
-            # assert False
-            self.buffer_reserved[index] = data # 保存该数据
+        if len(ds) > 1 : 
+            self.buffer_reserved[index] = data 
         elif not ds :
             assert False
         
