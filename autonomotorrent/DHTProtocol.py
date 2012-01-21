@@ -35,7 +35,6 @@ def dns_resolve(addr):
             addr = ip, port
             defer.returnValue(addr)
         except Exception as err :
-            #print 'resolve name eror', ip
             raise DHTError(err)
 
 def decodeIPAddr(addr) :
@@ -103,7 +102,6 @@ class RoutingTable :
 
     def doStart(self, dht_protocol):
         self.dht = dht_protocol
-        # 检查路由表里nodes good与否，删除坏的
         dht = self.dht
         nodes_dict = self.nodes_dict
         self.nodes_dict = {}
@@ -118,7 +116,6 @@ class RoutingTable :
 
     @defer.inlineCallbacks
     def autoFillRoutingTable(self):
-        # 填充路由表
         if len(self.nodes_dict) > 160 * 6:
             return
 
@@ -330,31 +327,6 @@ class RoutingTable :
 
     def __getitem__(self, node_id):
         return self.nodes_dict[node_id]
-
-    pkl_file = 'DHT.dat'
-
-    @classmethod
-    def load(self):
-        try:
-            fp = bz2.BZ2File(self.pkl_file, 'r')
-            return pickle.load(fp)
-        except:
-            return RoutingTable()
-
-    def dump(self):
-        dht = self.dht
-        del self.dht
-        rt = self.bucket
-        self.bucket = []
-
-        try:
-            fp = bz2.BZ2File(self.pkl_file, 'w') 
-            pickle.dump(self, fp)
-        except:
-            pass
-
-        self.dht = dht
-        self.bucket = rt
 
 class DHTError (Exception):
     pass
@@ -652,20 +624,12 @@ class DHTProtocol (DHTProtocolBase) :
         self.torrent = {}
 
     def startProtocol(self):
-        #print 'startProtocol'
-        #self.routingTable = RoutingTable()
-        self.routingTable = RoutingTable.load()
-
+        self.routingTable = RoutingTable()
         self.my_node_id = self.routingTable.my_node_id
-        
         self.routingTable.doStart(self)
-
         
     def stopProtocol(self):
-        #print 'stopProtocol'
         self.routingTable.doStop()
-        self.routingTable.dump()
-        
         self.torrent = {}
 
     @defer.inlineCallbacks
@@ -817,57 +781,3 @@ class DHTProtocol (DHTProtocolBase) :
     def _handle_announce_peer(self, info_hash, peer_addr):
         pass
 
-if __name__ == '__main__' :
-    from MetaInfo import BTMetaInfo
-    metainfo = BTMetaInfo('fcwr.torrent')
-
-    info_hash = metainfo.info_hash
-    nodes = metainfo['nodes']
-    for ip, port in nodes :
-        #print '{}:{}'.format(ip, port)
-        pass
-
-    with open('dht.txt','rb') as fp:
-        nodes_addr = []
-        for line in fp:
-            hostname, port = line.split()
-            port = int(port)
-            node = (hostname, port)
-            nodes_addr.append(node)
-
-    #print nodes
-    dht = DHTProtocol()
-    reactor.listenUDP(8881, dht)
-
-    peers_set = set()
-
-    def peers_callback(peers):
-        global peers_set
-        old_size = len(peers_set)
-        peers_set |= set(peers)
-        dz = len(peers_set) - old_size
-        log.msg('get peers {0} {1} {2}'.format(len(peers_set), dz, len(peers)))
-        pass
-
-    @defer.inlineCallbacks
-    def init():
-        # for df in [dht.searchPeers(node, info_hash) for node in nodes_addr]:
-        #     yield df
-
-        for df in [dht.addNode(node) for node in nodes_addr]:
-            yield df
-
-        dht.routingTable.autoFillRoutingTable()
-        log.msg("Number of nodes: {0}".format(len(dht.routingTable.nodes_dict)))
-        yield dht.register_torrent(info_hash, 6889, peers_callback)
-
-    init()
-
-    @defer.inlineCallbacks
-    def resolve(hostname):
-        ip = yield reactor.resolve(hostname)
-        log.msg('DNS: {0}:{1}'.format(hostname, ip))
-
-    resolve('www.sohu.com')
-
-    reactor.run()

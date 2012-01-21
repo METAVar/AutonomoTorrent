@@ -242,10 +242,8 @@ class BTProtocol(protocol.Protocol):
         assert len(data) == 4
         index, = struct.unpack('!I', data)
         self.download._have(index)
-        # print '-->> have index=%d' % index
 
     def handle_bitfield(self, data):
-
         self.download._bitfield(data)
 
     def handle_request(self, data):
@@ -263,14 +261,9 @@ class BTProtocol(protocol.Protocol):
 
     def handle_port(self, data):
         if self.btm.app.enable_DHT:
-            self.dht_fp = open('dht.txt', 'wb') 
             port, = struct.unpack('!H', data)
             self.dht_port = port
-
             addr = self.transport.getPeer().host
-            self.dht_fp.write('{0}\t{1}\n'.format(addr, port))
-            self.dht_fp.flush()
-
             self.btm.connectionManager.handle_port(addr, port)
 
 ############################################################
