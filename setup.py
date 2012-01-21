@@ -22,7 +22,6 @@ setup(
         Supports:
             - DHT
             - Multi-trackers
-            - Trackerless mode & Global peers pool
         """,
     license = "GPLv3",
     keywords = "bittorrent client",
