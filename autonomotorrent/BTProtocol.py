@@ -263,7 +263,7 @@ class BTProtocol(protocol.Protocol):
 
     def handle_port(self, data):
         if self.btm.app.enable_DHT:
-            dht_fp = open('dht.txt', 'wb') 
+            self.dht_fp = open('dht.txt', 'wb') 
             port, = struct.unpack('!H', data)
             self.dht_port = port
 
