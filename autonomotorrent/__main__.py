@@ -34,7 +34,7 @@ def console():
                       help='save download file to which directory')
     parser.add_option('-l', '--listen-port', action='store', type='int',
                      dest='listen_port', default=6881, 
-                     help='the listen port')
+                     help='Bittorrent listen port')
     parser.add_option("-d", "--enable_dht", action="store_true",
                     dest="enable_dht", help="enable the DHT extension") 
     parser.add_option("--remote_debug", action="store_true",
