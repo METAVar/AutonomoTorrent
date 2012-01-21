@@ -1,6 +1,5 @@
-#
-# -*-encoding:gb2312-*-
-
+"""
+"""
 import abc
 
 from twisted.python import log
@@ -46,8 +45,8 @@ class ConnectionManager (IConnectionManager):
         self.btm = btm
         self.btServer = self.btm.app.btServer
 
-        self.clientFactory = BTClientFactory(btm) # 管理主动连接
-        self.serverFactory = BTServerFactory(btm) # 管理被动连接
+        self.clientFactory = BTClientFactory(btm) 
+        self.serverFactory = BTServerFactory(btm) 
 
     def start(self):
         self.clientFactory.start()
@@ -173,17 +172,13 @@ class BTClientFactory(protocol.ClientFactory, ConnectionManagerBase):
         pass
 
     def startedConnecting(self, connector):
-        #print '开始连接', connector.getDestination()
         addr = self.getPeerAddr(connector)
         self.peers_connecting.add(addr)
 
     def clientConnectionFailed(self, connector, reason):
-        #print '连接不上', connector.getDestination(), reason
         self.connectRetry(connector)
 
     def clientConnectionLost(self, connector, reason):
-        #print '连接丢失', connector.getDestination(), reason
-        #self.connectRetry(connector)
         self.connectRetry(connector)
 
     @defer.inlineCallbacks
