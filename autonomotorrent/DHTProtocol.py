@@ -1,6 +1,5 @@
-#
-# -*-encoding:gb2312-*-
-
+"""Provides basic DHT functionality using Twisted
+"""
 import hashlib
 import struct
 import socket
@@ -9,9 +8,6 @@ import os
 import re
 import pickle
 import bz2
-
-# from twisted.internet import iocpreactor
-# iocpreactor.install()
 
 from twisted.internet import reactor
 from twisted.internet import protocol, defer
@@ -42,7 +38,6 @@ def decodeIPAddr(addr) :
         raise TypeError('addr should be a string')
 
     if len(addr) != 6:
-        #print len(addr)
         raise ValueError('len(addr) == 6')
         
     ip = socket.inet_ntoa(addr[0:4])
@@ -89,16 +84,13 @@ def encodeCompactPeers(peers) :
     return [encodeIPAddr(addr) for addr in peers]
 
 class RoutingTable :
-    timeout = 15 * 60                   # 15 min
+    timeout = 15 * 60  # 15 min
     
     def __init__(self):
         self.my_node_id = hashlib.sha1(os.urandom(160)).digest()
-
         self.nodes_dict = {}
         self.bucket = []
         self.k_value = 8
-
-        # self.peers_dict = {}            # {info_hash: {peer1, peer2,...}}
 
     def doStart(self, dht_protocol):
         self.dht = dht_protocol
@@ -135,14 +127,12 @@ class RoutingTable :
             else:
                 [(yield fd) for fd in
                  [self.addNode(addr) for _id, addr in nodes]]
-                # print 'nodes', len(nodes), len(self.nodes_dict)
         
     @defer.inlineCallbacks
     def addNode(self, addr):
         try:
             _id = yield self.dht.ping(addr)
         except DHTError as err:
-            #print err
             defer.returnValue(False)
         else:
             self.addGoodNode(_id, addr)
@@ -154,14 +144,11 @@ class RoutingTable :
 
     @defer.inlineCallbacks        
     def addGoodNode(self, node_id, node_addr):
-        '''
-        node should be good node
-        '''
         if node_id in self.nodes_dict :
             self.updateNode(node_id)
             return
 
-        if len(self.nodes_dict) > 160 * 6: # too much nodes in the table
+        if len(self.nodes_dict) > 160 * 6: # too many nodes in the table
             return
         
         self.nodes_dict[node_id] = node_addr
@@ -174,7 +161,6 @@ class RoutingTable :
                 assert node_id == _id
             except DHTError as err:
                 self.removeNode(node_id)
-                #yield self.__autoFillRoutingTable()
                 break
             else:
                 self.updateNode(node_id)
@@ -209,7 +195,7 @@ class RoutingTable :
                 pass
             buk.append(node_id)
 
-            if len(buk) > self.k_value: # 分裂成两个
+            if len(buk) > self.k_value: 
                 _buk, buk_ = [], []
                 for node in buk:
                     _idx = 159 - self.__distance(node)
@@ -228,7 +214,7 @@ class RoutingTable :
 
             if len(buk) > self.k_value:
                 del self.nodes_dict[buk[0]]
-                del buk[0]              # 把老的丢掉
+                del buk[0]              
 
     def __distance(self, node_id):
         for i in range(20):
@@ -303,25 +289,6 @@ class RoutingTable :
         '''
         return [(_id, self.nodes_dict[_id]) for _id in self.__findFromBucket(node_id)]
 
-    # def queryPeer(self, info_hash):
-    #     return list(self.peers_dict.get(info_hash, []))[:10]
-
-    # def addPeer(self, info_hash, peer):
-    #     '''
-    #     @peer: (ip, port)
-    #     '''
-    #     if info_hash in self.peers_dict:
-    #         self.peers_dict[info_hash].add(peer)
-    #     else:
-    #         self.peers_dict[info_hash] = set()
-
-    # def addPeers(self, info_hash, peers):
-    #     '''
-    #     @peer: (ip, port)
-    #     '''
-    #     for peer in peers:
-    #         self.addPeer(peer)
-
     def __contains__(self, node_id):
         return node_id in self.nodes_dict
 
@@ -332,7 +299,7 @@ class DHTError (Exception):
     pass
 
 class DHTProtocolBase (protocol.DatagramProtocol) :
-    timeout = 15                        # seconds
+    timeout = 15  # seconds
 
     def __init__(self):
         self.my_node_id = os.urandom(20)
@@ -342,17 +309,13 @@ class DHTProtocolBase (protocol.DatagramProtocol) :
         self.sent_tokens = {}
 
     def startProtocol(self):
-        #print 'startProtocol'
         pass
         
     def stopProtocol(self):
-        #print 'stopProtocol'
         pass
 
     @defer.inlineCallbacks
     def ping(self, node_addr, timeout=None):
-        #print '<<-- send ping', node_addr
-        
         args = {'id' : self.my_node_id}
         data = yield self.__KRPC_do_query(node_addr, 'ping', args, timeout)
         node_id = data['id']
@@ -360,11 +323,8 @@ class DHTProtocolBase (protocol.DatagramProtocol) :
 
     @defer.inlineCallbacks
     def find_node(self, node_addr, target_id, timeout=None):
-        #print '<<-- send find node', node_addr
-
         args = {'id' : self.my_node_id,
                 'target' : target_id}
-
         data = yield self.__KRPC_do_query(node_addr, 'find_node', args, timeout)
         node_id = data['id']
         nodes = decodeCompactNodes(data['nodes'])
@@ -372,13 +332,9 @@ class DHTProtocolBase (protocol.DatagramProtocol) :
 
     @defer.inlineCallbacks
     def get_peers(self, node_addr, info_hash, timeout=None):
-        #print '<<-- send get_peers', node_addr
-
         args = {'id' : self.my_node_id,
                 'info_hash' : info_hash}
         data = yield self.__KRPC_do_query(node_addr, 'get_peers', args, timeout)
-
-        #print '-->> response get_peers'
         node_id = data['id']
 
         if 'token' in data:
@@ -409,8 +365,6 @@ class DHTProtocolBase (protocol.DatagramProtocol) :
 
     @defer.inlineCallbacks
     def announce_peer(self, node_addr, info_hash, port, timeout=None):
-        #print '<<-- send announce_peer', node_addr
-
         if node_addr not in self.recieved_tokens:
             node_id, _type, peers = yield self.get_peers(node_addr, info_hash)
 
@@ -434,14 +388,6 @@ class DHTProtocolBase (protocol.DatagramProtocol) :
         df = defer.Deferred()
         self.transaction[t_id] = df
 
-        # def cancel():
-        #     if t_id in self.transaction:
-        #         df.errback(DHTError((0, 'timeout: "{}" to {}'.format(qtype, node_addr))))
-
-        # if timeout is None: timeout = self.timeout
-        # reactor.callLater(timeout, cancel)
-        # return df
-
         @defer.inlineCallbacks
         def timeout_check(timeout):
             if timeout is None: timeout = self.timeout
@@ -462,17 +408,15 @@ class DHTProtocolBase (protocol.DatagramProtocol) :
         if t_id in self.transaction:
             df = self.transaction[t_id]
             df.callback(data)
-        else:                           # timeout
+        else:   # timeout
             pass
 
     def __KRPC_fire_error(self, t_id, error, node_addr):
         if t_id in self.transaction:
             df = self.transaction[t_id]
             df.errback(DHTError(*error))
-        else:                           # timeout
+        else:   # timeout
             pass
-
-    ############################################################
 
     def _KRPC_send_query(self, node_addr, t_id, qtype, args):
         data = {'t' : t_id,
@@ -518,7 +462,6 @@ class DHTProtocolBase (protocol.DatagramProtocol) :
 
         self._handle_query(node_id, node_addr)
 
-    ############################################################
     @defer.inlineCallbacks
     def writeDatagram(self, data, node_addr):
         node_addr = yield dns_resolve(node_addr)
@@ -542,16 +485,13 @@ class DHTProtocolBase (protocol.DatagramProtocol) :
         else:
             assert False
 
-    ############################################################
             
     def handle_ping(self, t_id, data, node_addr):
-        #print '-->>query ping', node_addr
         node_id = data['id']
         args = {'id' : self.my_node_id}
         self._KRPC_send_response(node_addr, t_id, args)
 
     def handle_find_node(self, t_id, data, node_addr):
-        #print '-->>query find_node', node_addr
         node_id = data['id']
         target_id = data['target']
         nodes = self._handle_find_node(target_id)
@@ -560,7 +500,6 @@ class DHTProtocolBase (protocol.DatagramProtocol) :
         self._KRPC_send_response(node_addr, t_id, args)
         
     def handle_get_peers(self, t_id, data, node_addr):
-        #print '-->>query get_peers', node_addr
         node_id = data['id']
         info_hash = data['info_hash']
 
@@ -586,7 +525,6 @@ class DHTProtocolBase (protocol.DatagramProtocol) :
         self._KRPC_send_response(node_addr, t_id, args)
 
     def handle_announce_peer(self, t_id, data, node_addr):
-        #print '-->>query announce_peer', node_addr
         node_id = data['id']
         info_hash = data['info_hash']
         port = data['port']
@@ -603,7 +541,6 @@ class DHTProtocolBase (protocol.DatagramProtocol) :
         args = {'id' : self.my_node_id}
         self._KRPC_send_response(node_addr, t_id, args)
     
-    ############################################################
     def _handle_get_peers(self, info_hash):
         raise NotImplemented()
 
@@ -646,11 +583,7 @@ class DHTProtocol (DHTProtocolBase) :
             log.err() 
             return
         else:
-            #print 'get_peers', values
-
             node_id, nodes = yield self.find_node(node_addr, node_id)
-
-            #print 'find_node', nodes
         
     @defer.inlineCallbacks
     def register_torrent(self, info_hash, my_peer_port, callback):
@@ -726,15 +659,11 @@ class DHTProtocol (DHTProtocolBase) :
             self.routingTable.removeNode(node_id)
             return
 
-        # good node
         self.routingTable.addGoodNode(node_id, node_addr)
 
         if _type == 'values':
-            #print 'peers', len(values)
             peers_result |= set(values)
-
             peers_callback(values)
-
             if my_peer_port :
                 try:
                     _id = yield self.announce_peer(node_addr, info_hash, my_peer_port)
@@ -742,7 +671,6 @@ class DHTProtocol (DHTProtocolBase) :
                     pass
 
         elif _type == 'nodes':
-            #print 'nodes', len(values)
             dfs = []
             for node in values:
                 df = self._getPeers(node, info_hash, query_history)
