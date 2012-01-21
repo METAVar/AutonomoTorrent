@@ -12,7 +12,7 @@ found that most of the well-known Python clients relied upon
 is in C.  This worked well for dedicated clients, but all I wanted was a
 no-frills, good-enough client to integrate into another application for
 distributed file sharing.  I looked at serveral pure-Python projects before
-settling on ABTorrent due to its minimal featureset, clean code and relatively 
+settling on ABTorrent due to its minimal featureset and relatively 
 up-to-date codebase (have a look at the old "Mainline" client code to get an 
 idea of what I was comparing it against).  
   
@@ -41,5 +41,20 @@ manually.
   - Ubuntu: `sudo apt-get install python-twisted`  
   - Windows: Get the [installer here](http://twistedmatrix.com/trac/wiki/Downloads#Windows).  
 
+##Development
+Develpoment is slow to non-existent at the moment as real life has caught up
+with me.  If you want to help though, the biggest need is to refactor 
+the code base as it is mostly unchanged from the original ABTorrent, and is 
+really ugly in places.  The next biggest issue would be to write unit tests for
+everything.
 
+Either way, when submitting patches or pull requests, please at least run your
+code though pylint and the cylomatic complexity tests bundled with the
+test/pre-commit script. You don't have to fix everything, but at least attempt
+to stick to PEP 8 and keep your CC under 8.
+
+```
+cd AutonomoTorrent
+tests/pre-commit
+```
 
