@@ -1,5 +1,5 @@
-#
-# -*-encoding:gb2312-*-
+"""
+"""
 import hashlib
 import time, os
 
@@ -8,15 +8,11 @@ from twisted.python import log
 
 def sleep(timeout):
     df = defer.Deferred()
-
     start_time = time.time()
-    
     def callback():
         dt = time.time() - start_time
         df.callback(dt)
-        
     reactor.callLater(timeout, callback)
-    
     return df
 
 @defer.inlineCallbacks
@@ -38,13 +34,10 @@ class SpeedMonitor (object):
     def __init__(self, period=None):
         self.bytes = 0
         self.start_time = None
-
         self.period = period
-
         self.bytes_record = 0
         self.time_record = None
         self.speed = 0
-
         self.observer = None
 
     def registerObserver(self, observer):
@@ -94,8 +87,8 @@ class SpeedMonitor (object):
             return 0
 
 def generate_peer_id():
-    myid = 'M' + '7-2-0' + '--' # 8
-    myid += hashlib.sha1(str(time.time())+ ' ' + str(os.getpid())).hexdigest()[-12:] # 12
+    myid = 'M' + '7-2-0' + '--' 
+    myid += hashlib.sha1(str(time.time())+ ' ' + str(os.getpid())).hexdigest()[-12:] 
     assert len(myid) == 20
     return myid
 
