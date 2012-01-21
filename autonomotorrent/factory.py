@@ -1,3 +1,5 @@
+#
+# -*-encoding:gb2312-*-
 """
 """
 import abc
