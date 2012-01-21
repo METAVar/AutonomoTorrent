@@ -14,8 +14,7 @@ from autonomotorrent.MetaInfo import BTMetaInfo
 from autonomotorrent.DHTProtocol import DHTProtocol
 
 class BTConfig(object):
-    def __init__(self, torrent_path=None, meta_info=None, trackerless=False):
-        self.trackerless = trackerless
+    def __init__(self, torrent_path=None, meta_info=None):
         if torrent_path:
             #self.torrentPath = torrent_path #TODO: Do we need this?
             self.metainfo = BTMetaInfo(path=torrent_path)
@@ -40,13 +39,10 @@ class BTApp:
     def __init__(self, save_dir=".", 
                        listen_port=6881, 
                        enable_DHT=False,
-                       remote_debugging=False, 
-                       global_peers=None):
+                       remote_debugging=False):
         """
         @param remote_degugging enables telnet login via port 9999 with a
             username and password of 'admin'
-        @param global_peers list of tuples e.g. [('173.248.194.166', 12005),
-            ('192.166.145.8', 13915)]
         """
         log.startLogging(sys.stdout) # Start logging to stdout
         self.save_dir = save_dir
@@ -55,11 +51,6 @@ class BTApp:
         self.tasks = {}
         self.btServer = BTServerFactories(self.listen_port)
         reactor.listenTCP(self.listen_port, self.btServer)
-        if global_peers:
-            self.global_peer_pool = set(global_peers)
-        else:
-            self.global_peer_pool = set() 
-
         if enable_DHT:
             log.msg("Turning DHT on.")
             self.dht = DHTProtocol()
@@ -75,16 +66,6 @@ class BTApp:
             dbg.namespace['app'] = self 
             reactor.listenTCP(9999, dbg)
 
-    def add_global_peers(self, peer_list):
-        """
-        @param peer_list list of tuples e.g. [('173.248.194.166', 12005),
-            ('192.166.145.8', 13915)]
-        """
-        self.global_peer_pool.union(peers)
-        for torrent_manager in self.tasks.itervalues():
-            # TODO: Change to set_global_peers?  Why??
-            torrent_manager.add_peers(list(self.global_peer_pool))
-
     def add_torrent(self, config):
         config.check()
         info_hash = config.info_hash
@@ -92,8 +73,6 @@ class BTApp:
             log.msg('Torrent {0} already in download list'.format(config.metainfo.pretty_info_hash))
         else:
             btm = BTManager(self, config)
-            if len(self.global_peer_pool) > 0:
-                btm.add_peers(list(self.global_peer_pool))
             self.tasks[info_hash] = btm
             btm.startDownload()
             return info_hash 

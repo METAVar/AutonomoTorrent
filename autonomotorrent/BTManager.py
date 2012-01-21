@@ -18,12 +18,10 @@ class BTManager (object):
         self.my_peer_id = generate_peer_id()
         self.connectionManager = ConnectionManager(self)
         self.pieceManager = BTPieceManager(self)
-        if not self.config.trackerless:
-            if len(self.metainfo.announce_list) > 0:
-                self.bttrackerclient = BTTrackerClient(self)
-            else: 
-                raise Exception("Need at least one tracker if torrent is "+\
-                    "not trackerless.")
+        if len(self.metainfo.announce_list) > 0:
+            self.bttrackerclient = BTTrackerClient(self)
+        else: 
+            raise Exception("Torrent needs at least one tracker")
         self.status = None
 
     def startDownload(self):
@@ -34,8 +32,7 @@ class BTManager (object):
         self.downloadSpeedMonitor.start()
         self.uploadSpeedMonitor.start()
 
-        if not self.config.trackerless:
-            self.bttrackerclient.start()
+        self.bttrackerclient.start()
 
         self.status = 'running'
 
@@ -47,8 +44,7 @@ class BTManager (object):
         self.downloadSpeedMonitor.stop()
         self.uploadSpeedMonitor.stop()
 
-        if not self.config.trackerless:
-            self.bttrackerclient.stop()
+        self.bttrackerclient.stop()
 
         self.status = 'stopped'
 
