@@ -1,6 +1,5 @@
-# 
-# -*-encoding:gb2312-*-
-
+"""
+"""
 import hashlib
 
 from twisted.python import log
@@ -18,16 +17,16 @@ class BTPieceManager:
 
         self.btfiles = BTFileManager(btm)
 
-        self.bitfield = self.btfiles.bitfieldHave # 标记已经下载的块
+        self.bitfield = self.btfiles.bitfieldHave 
 
         metainfo = self.metainfo
         self.piece_length = metainfo.piece_length
         self.pieces_size = metainfo.pieces_size
         self.pieces_hash = metainfo.pieces_hash
 
-        self.buffer = {}        # 缓冲已完成的piece
+        self.buffer = {}        
 
-        self.bfNeed = self.btfiles.bitfieldNeed   # 标记没有下载的块
+        self.bfNeed = self.btfiles.bitfieldNeed   
 
         self.pieceDownload = {} # [idx]: [todo], [doing], [done] 
         self.pieceTodo = {}
@@ -42,12 +41,10 @@ class BTPieceManager:
 
     def do_slice(self, beg, end):
         slice_list = []
-
         r = range(beg, end, self.slice_size)
         for beg in r[:-1] :
             slice_list.append((beg, self.slice_size))
         slice_list.append((r[-1], end-r[-1]))
-
         return slice_list
 
     def __getPieceSlice(self, idx):
@@ -86,39 +83,28 @@ class BTPieceManager:
 
     def getPieceTask(self, idx):
         assert idx in self.bfNeed
-
         if idx not in self.pieceDownload:
             slice_list = self.__getPieceSlice(idx)
             self.pieceDownload[idx] = [slice_list, [], []]
 
         task_to_do, task_doing, task_done = self.pieceDownload[idx]
-
         if not task_to_do:
             return None
-
         my_task = task_to_do[0]
         del task_to_do[0]
-
         task_doing.append(my_task)
-
         return idx, my_task
 
     def failedPieceTask(self, idx, task):
-        #log.err('下载失败 {0}{1}'.format(idx, task))
         task_to_do, task_doing, task_done = self.pieceDownload[idx]
         assert task in task_doing
-
         task_doing.remove(task)
-
         task_to_do.append(task)
 
     def finishPieceTask(self, idx, task, data):
         task_to_do, task_doing, task_done = self.pieceDownload[idx]
-
         assert task in task_doing
-
         task_doing.remove(task)
-
         task_done.append((task, data))
 
         if not task_to_do and not task_doing :
