@@ -10,13 +10,6 @@ class BitOp (object):
     def __and__(self, bf):
         return BitfieldOperatorProxy(self, bf, lambda x,y: x&y)
 
-    # def __or__(self, bf):
-    #     return BitfieldOperatorProxy(self, bf, lambda x,y: x|y)
-
-    # def __xor__(self, bf):
-    #     return BitfieldOperatorProxy(self, bf, lambda x,y: x^y)
-
-
 class Bitfield (BitOp):
 
     def __init__(self, length, bitstring=None):
@@ -174,17 +167,3 @@ class BitfieldOperatorProxy (object):
 
     def allZero(self):
         return self.op(self.bf1.allZero(), self.bf2.allZero())
-
-if __name__ == '__main__':
-    bt1 = Bitfield(64, '\xFF'*4 + '\xFF'*4)
-    bt2 = Bitfield(64, '\x01\x01\x01\x01' + '\xFF'*4)
-
-    # for idx in bt1&bt2:
-    #     print idx
-    
-    print 0 in bt1, 0 in bt2, 0 in bt2|bt1, 7 in bt1&bt2
-
-    for i in bt2&bt1:
-        print i
-
-
