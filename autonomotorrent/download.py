@@ -1,6 +1,5 @@
-#
-# -*-encoding:gb2312-*-
-
+"""
+"""
 from twisted.internet import reactor, defer
 
 from tools import SpeedMonitor, sleep
@@ -28,17 +27,12 @@ class BTDownload(object) :
             return
 
         self.status = 'running'
-        
         self.btm = self.protocol.factory.btm
         self.pieceManager = self.btm.pieceManager
-
         pm = self.pieceManager
         self.peer_bitfield = Bitfield(pm.pieces_size)
-
         self.downloadSpeedMonitor.start()
         self.downloadSpeedMonitor.registerObserver(self.protocol.factory.downloadSpeedMonitor)
-
-        #reactor.callLater(0, self.interested, True)
 
     def stop(self):
         for task in self.piece_doing:
@@ -63,7 +57,6 @@ class BTDownload(object) :
             self.__pieceRequest()
 
     def interested(self, val):
-        # 发送
         am_interested = bool(val)
         if self.am_interested is am_interested :
             return
@@ -83,24 +76,18 @@ class BTDownload(object) :
         self.downloadSpeedMonitor.addBytes(len(data))        
 
     def __pieceRequest(self):
-        # 全部接受上次请求的块数据后才能发送新请求, 5分钟超时断连接
         if self.am_interested==True and self.peer_choke==False:
-        #if self.am_interested==True :
             if self.piece_doing :
                 return
-
             new_task = self.__getTask()
-            
             if new_task :
                 self.__sendTaskRequest(new_task)
             
     def __getTask(self, size=None):
         if size is None :
             size = self.task_max_size
-            
         pm = self.pieceManager
         new_task = pm.getMorePieceTask(self.peer_bitfield, size)
-
         return new_task
 
     @defer.inlineCallbacks
@@ -123,10 +110,8 @@ class BTDownload(object) :
         if self.status == 'stopped' :
             return
         
-        #self.transport.loseConnection()
         set_plan = set(task_plan)
         set_ing = set(self.piece_doing)
-
         set_undo = set_plan & set_ing
         set_new = set_ing - set_plan
 
@@ -155,45 +140,28 @@ class BTDownload(object) :
             self.__sendTaskRequest(new_task)
 
     def _piece(self, index, beg, piece):
-        # 接收发来的piece
         task = index, (beg, len(piece))
-
         if task not in self.piece_doing: 
-            #log.msg('-->> drop canceled piece: {0}'.format(task))
             return
 
-
         self.pieceManager.finishPieceTask(index, (beg, len(piece)), piece)
-        
         self.piece_doing.remove(task)
-
         if len(self.piece_doing) == 0:
             self.__pieceRequest()
 
     def _bitfield(self, data):
-        # 接收
         pm = self.pieceManager
         bf = Bitfield(pm.pieces_size, data)
-
         self.peer_bitfield = bf
         
         if self.pieceManager.amInterested(bf):
             self.interested(True)
             self.__pieceRequest()
         else:
-            # print self.peer_bitfield
-            # print self.pieceManager.bfNeed
-            # assert False
             self.interested(False)
 
-        #print 'interested ', self.am_interested, 'bitfield', bf.any()
-
     def _have(self, index):
-        # 接收
         self.peer_bitfield[index] = 1
-
         if self.pieceManager.amInterested(index) :
             self.interested(True)
             self.__pieceRequest()
-
-        #self.protocol.btm.connectionManager.broadcastHave(index)
